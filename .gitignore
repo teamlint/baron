@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Binaries for programs and plugins
 *.exe
 *.exe~
@@ -13,3 +14,22 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+=======
+## vim
+# swap
+[._]*.s[a-w][a-z]
+[._]s[a-w][a-z]
+# session
+Session.vi
+
+# jetbrains project files
+.idea
+
+# generated example services
+_example/*
+!_example/echo.proto
+
+# Prevents accidentally including a problematic folder within the `vendor/`
+# folder.
+vendor/github.com/sirupsen/logrus/examples/
+>>>>>>> upstream/master
