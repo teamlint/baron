@@ -11,12 +11,12 @@ import (
 	"io"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/metaverse/truss/gengokit"
-	"github.com/metaverse/truss/gengokit/handlers/templates"
-	"github.com/metaverse/truss/svcdef"
+	"github.com/teamlint/baron/gengokit"
+	"github.com/teamlint/baron/gengokit/handlers/templates"
+	"github.com/teamlint/baron/svcdef"
 )
 
 // NewService is an exported func that creates a new service
@@ -24,9 +24,9 @@ import (
 const ignoredFunc = "NewService"
 
 // ServerHadlerPath is the relative path to the server handler template file
-const ServerHandlerPath = "handlers/handlers.gotemplate"
+const ServerHandlerPath = "service/service.gotemplate"
 
-// New returns a truss.Renderable capable of updating server handlers.
+// New returns a baron.Renderable capable of updating server handlers.
 // New should be passed the previous version of the server handler to parse.
 func New(svc *svcdef.Service, prev io.Reader) (gengokit.Renderable, error) {
 	var h handler
@@ -287,9 +287,9 @@ func exprString(e ast.Expr) string {
 
 func applyServerTempl(exec *gengokit.Data) (io.Reader, error) {
 	log.Debug("Rendering handler for the first time")
-	return exec.ApplyTemplate(templates.Handlers, "ServerTempl")
+	return exec.ApplyTemplate(templates.Services, "ServerTempl")
 }
 
 func applyServerMethsTempl(exec handlerData) (io.Reader, error) {
-	return gengokit.ApplyTemplate(templates.HandlerMethods, "ServerMethsTempl", exec, gengokit.FuncMap)
+	return gengokit.ApplyTemplate(templates.ServiceMethods, "ServerMethsTempl", exec, gengokit.FuncMap)
 }

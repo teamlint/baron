@@ -1,11 +1,11 @@
-package getstarted
+package start
 
 const starterProto = `
 syntax = "proto3";
 
 package {{.PackageName}};
 
-import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
 
 service {{.ServiceName}} {
   rpc Status(StatusRequest) returns (StatusResponse) {
@@ -33,16 +33,16 @@ const nextStepMsg = `A "starter" protobuf file named '{{.FileName}}' has been cr
 current directory. You can generate a service based on this new protobuf file
 at any time using the following command:
 
-    truss {{.FileName}}
+    baron {{.FileName}}
 
 If you want to generate a protofile with a different name, use the
-'--getstarted' option with the name of your choice after '--getstarted'. For
+'--start' option with the name of your choice after '--start'. For
 example, to generate a 'foo.proto', use the following command:
 
-    truss --getstarted foo
+    baron --start foo
 `
 const existingFileMsg = `There's already a "starter" protobuf file named '{{.FileName}}' in the current
 directory. If you'd like to generate a service based on this existing protobuf
 file, you should instead run the command:
 
-    truss {{.FileName}}`
+    baron {{.FileName}}`

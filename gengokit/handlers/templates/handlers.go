@@ -1,6 +1,6 @@
 package templates
 
-const HandlerMethods = `
+const ServiceMethods = `
 {{ with $te := .}}
 		{{range $i := .Methods}}
 		func (s {{ToLower $te.ServiceName}}Service) {{.Name}}(ctx context.Context, in *pb.{{GoName .RequestType.Name}}) (*pb.{{GoName .ResponseType.Name}}, error){
@@ -11,8 +11,8 @@ const HandlerMethods = `
 {{- end}}
 `
 
-const Handlers = `
-package handlers
+const Services = `
+package service
 
 import (
 	"context"

@@ -1,4 +1,4 @@
-package getstarted
+package start
 
 import (
 	"bytes"
@@ -6,9 +6,9 @@ import (
 	"strings"
 	"text/template"
 
-	log "github.com/sirupsen/logrus"
 	gogen "github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 type protoInfo struct {
@@ -36,12 +36,12 @@ func (p protoInfo) ServiceName() string {
 }
 
 // Do writes a default protobuf file to the current directory, in a file named
-// based on the 'pkg' param, defaulting to "getstarted.proto" if pkg is empty.
+// based on the 'pkg' param, defaulting to "start.proto" if pkg is empty.
 // If the file exists, Do prints a warning and returns a non-zero exit code.
 // The non-zero exit code is to enable using the return from this function in
 // os.Exit().
 func Do(pkg string) int {
-	const fallbackFName = "get_started"
+	const fallbackFName = "start"
 	if pkg == "" {
 		pkg = fallbackFName
 	}
@@ -93,7 +93,7 @@ func removeDotProtoSuffix(pkg string) string {
 '{{.Got}}', you should provide '{{.Want}}'. Here's an example of the correct
 command to enter next time:
 
-	truss --getstarted {{.Want}}
+	baron --start {{.Want}}
 
 For now this program is continuing as though you used '{{.Want}}'.
 `

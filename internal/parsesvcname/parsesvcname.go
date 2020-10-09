@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/metaverse/truss/svcdef"
-	"github.com/metaverse/truss/truss/execprotoc"
 	"github.com/pkg/errors"
+	"github.com/teamlint/baron/internal/execprotoc"
+	"github.com/teamlint/baron/svcdef"
 )
 
 // FromPaths accepts the paths of protobuf definition files and returns the
@@ -60,7 +60,7 @@ func FromPaths(gopath []string, protoDefPaths []string) (string, error) {
 
 	sd, err := svcdef.New(pbgoFiles, pbFiles)
 	if err != nil {
-		return "", errors.Wrapf(err, "failed to create service definition; did you pass ALL the protobuf files to truss?")
+		return "", errors.Wrapf(err, "failed to create service definition; did you pass ALL the protobuf files to baron?")
 	}
 
 	if sd.Service == nil {

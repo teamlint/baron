@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
 	gogen "github.com/gogo/protobuf/protoc-gen-gogo/generator"
 
-	"github.com/metaverse/truss/svcdef/svcparse"
+	"github.com/teamlint/truss/svcdef/svcparse"
 )
 
 type optional interface {

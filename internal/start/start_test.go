@@ -1,4 +1,4 @@
-package getstarted
+package start
 
 import "testing"
 

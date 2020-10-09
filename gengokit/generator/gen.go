@@ -8,14 +8,14 @@ import (
 	"io/ioutil"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/metaverse/truss/gengokit"
-	"github.com/metaverse/truss/gengokit/handlers"
-	templFiles "github.com/metaverse/truss/gengokit/template"
+	"github.com/teamlint/baron/gengokit"
+	"github.com/teamlint/baron/gengokit/handlers"
+	templFiles "github.com/teamlint/baron/gengokit/template"
 
-	"github.com/metaverse/truss/svcdef"
+	"github.com/teamlint/baron/svcdef"
 )
 
 // GenerateGokit returns a gokit service generated from a service definition (svcdef),
@@ -33,7 +33,7 @@ func GenerateGokit(sd *svcdef.Svcdef, conf gengokit.Config) (map[string]io.Reade
 	svcname := strings.ToLower(sd.Service.Name)
 	for _, templPath := range templFiles.AssetNames() {
 		// Re-derive the actual path for this file based on the service output
-		// path provided by the truss main.go
+		// path provided by the baron main.go
 		actualPath := templatePathToActual(templPath, svcname)
 		file, err := generateResponseFile(templPath, data, conf.PreviousFiles[actualPath])
 		if err != nil {

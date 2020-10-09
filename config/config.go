@@ -1,8 +1,8 @@
-package truss
+package config
 
 import "io"
 
-// Config defines the inputs to a truss service generation
+// Config defines the inputs to a baron service generation
 type Config struct {
 	// The first path in $GOPATH
 	GoPath []string
@@ -14,7 +14,7 @@ type Config struct {
 	ServicePackage string
 	ServicePath    string
 
-	// The paths to each of the .proto files truss is being run against
+	// The paths to each of the .proto files baron is being run against
 	DefPaths []string
 	// The files of a previously generated service, may be nil
 	PrevGen map[string]io.Reader

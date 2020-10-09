@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/metaverse/truss/truss/execprotoc"
 	"github.com/pkg/errors"
+	"github.com/teamlint/truss/truss/execprotoc"
 )
 
 // NewFromString creates a Svcdef from a string of a valid protobuf file. Very

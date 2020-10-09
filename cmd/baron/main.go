@@ -15,44 +15,48 @@ import (
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
 
-	"github.com/metaverse/truss/truss"
-	"github.com/metaverse/truss/truss/execprotoc"
-	"github.com/metaverse/truss/truss/getstarted"
-	"github.com/metaverse/truss/truss/parsesvcname"
+	"github.com/teamlint/baron/config"
+	"github.com/teamlint/baron/internal/execprotoc"
+	"github.com/teamlint/baron/internal/parsesvcname"
+	"github.com/teamlint/baron/internal/start"
 
-	ggkconf "github.com/metaverse/truss/gengokit"
-	gengokit "github.com/metaverse/truss/gengokit/generator"
-	"github.com/metaverse/truss/svcdef"
+	ggkconf "github.com/teamlint/baron/gengokit"
+	gengokit "github.com/teamlint/baron/gengokit/generator"
+	"github.com/teamlint/baron/svcdef"
+)
+
+const (
+	handlersDirName = "service"
 )
 
 var (
 	svcPackageFlag = flag.String("svcout", "", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
 	verboseFlag    = flag.BoolP("verbose", "v", false, "Verbose output")
 	helpFlag       = flag.BoolP("help", "h", false, "Print usage")
-	getStartedFlag = flag.BoolP("getstarted", "", false, "Output a 'getstarted.proto' protobuf file in ./")
+	getStartedFlag = flag.BoolP("start", "", false, "Output a 'start.proto' protobuf file in ./")
 )
 
 var binName = filepath.Base(os.Args[0])
 
 var (
-	// version is compiled into truss with the flag
+	// version is compiled into baron with the flag
 	// go install -ldflags "-X main.version=$SHA"
 	version string
-	// BuildDate is compiled into truss with the flag
+	// BuildDate is compiled into baron with the flag
 	// go install -ldflags "-X main.date=$VERSION_DATE"
 	date string
 )
 
 func init() {
-	// If Version or VersionDate are not set, truss was not built with make
+	// If Version or VersionDate are not set, baron was not built with make
 	if version == "" || date == "" {
 		rebuild := promptNoMake()
 		if !rebuild {
 			os.Exit(1)
 		}
-		err := makeAndRunTruss(os.Args)
+		err := makeAndRunbaron(os.Args)
 		if err != nil {
-			log.Fatal(errors.Wrap(err, "please install truss with make manually"))
+			log.Fatal(errors.Wrap(err, "please install baron with make manually"))
 		}
 		os.Exit(0)
 	}
@@ -90,7 +94,7 @@ func main() {
 		if len(flag.Args()) > 0 {
 			pkg = flag.Args()[0]
 		}
-		os.Exit(getstarted.Do(pkg))
+		os.Exit(start.Do(pkg))
 	}
 
 	if len(flag.Args()) == 0 {
@@ -129,10 +133,10 @@ func main() {
 	cleanupOldFiles(cfg.ServicePath, strings.ToLower(sd.Service.Name))
 }
 
-// parseInput constructs a *truss.Config with all values needed to parse
+// parseInput constructs a *config.Config with all values needed to parse
 // service definition files.
-func parseInput() (*truss.Config, error) {
-	var cfg truss.Config
+func parseInput() (*config.Config, error) {
+	var cfg config.Config
 
 	// GOPATH
 	cfg.GoPath = filepath.SplitList(os.Getenv("GOPATH"))
@@ -187,7 +191,7 @@ func parseInput() (*truss.Config, error) {
 		// If the package flag ends in a seperator, file will be "".
 		_, file := filepath.Split(svcOut)
 		seperator := file == ""
-		log.WithField("seperator", seperator)
+		log.WithField("seperator", seperator).Debug()
 
 		svcPath, err = parseSVCOut(svcOut, cfg.GoPath[0])
 		if err != nil {
@@ -241,8 +245,8 @@ func parseSVCOut(svcOut string, GOPATH string) (string, error) {
 }
 
 // parseServiceDefinition returns a svcdef which contains all necessary
-// information for generating a truss service.
-func parseServiceDefinition(cfg *truss.Config) (*svcdef.Svcdef, error) {
+// information for generating a baron service.
+func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 	protoDefPaths := cfg.DefPaths
 	// Create the ServicePath so the .pb.go files may be place within it
 	if cfg.PrevGen == nil {
@@ -273,7 +277,7 @@ func parseServiceDefinition(cfg *truss.Config) (*svcdef.Svcdef, error) {
 	// Create the svcdef
 	sd, err := svcdef.New(pbgoFiles, pbFiles)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to create service definition; did you pass ALL the protobuf files to truss?")
+		return nil, errors.Wrapf(err, "failed to create service definition; did you pass ALL the protobuf files to baron?")
 	}
 
 	return sd, nil
@@ -281,7 +285,7 @@ func parseServiceDefinition(cfg *truss.Config) (*svcdef.Svcdef, error) {
 
 // generateCode returns a map[string]io.Reader that represents a gokit
 // service
-func generateCode(cfg *truss.Config, sd *svcdef.Svcdef) (map[string]io.Reader, error) {
+func generateCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Reader, error) {
 	conf := ggkconf.Config{
 		PBPackage:     cfg.PBPackage,
 		GoPackage:     cfg.ServicePackage,
@@ -339,7 +343,7 @@ func cleanProtofilePath(rawPaths []string) ([]string, error) {
 		log.WithField("rawDefPath", def).Debug()
 		full, err := filepath.Abs(def)
 		if err != nil {
-			return nil, errors.Wrap(err, "cannot get working directory of truss")
+			return nil, errors.Wrap(err, "cannot get working directory of baron")
 		}
 		log.WithField("fullDefPath", full)
 
@@ -359,7 +363,6 @@ func readPreviousGeneration(serviceDir string) (map[string]io.Reader, error) {
 		return nil, nil
 	}
 
-	const handlersDirName = "handlers"
 	files := make(map[string]io.Reader)
 
 	addFileToFiles := func(path string, info os.FileInfo, err error) error {
@@ -439,18 +442,18 @@ func cleanupOldFiles(servicePath, serviceName string) {
 	}
 }
 
-// promptNoMake prints that truss was not built with make and prompts the user
+// promptNoMake prints that baron was not built with make and prompts the user
 // asking if they would like for this process to be automated
 // returns true if yes, false if not.
 func promptNoMake() bool {
 	const msg = `
-truss was not built using Makefile.
+baron was not built using Makefile.
 Please run 'make' inside go import path %s.
 
 Do you want to automatically run 'make' and rerun command:
 
 	$ `
-	fmt.Printf(msg, trussImportPath)
+	fmt.Printf(msg, baronImportPath)
 	for _, a := range os.Args {
 		fmt.Print(a)
 		fmt.Print(" ")
@@ -473,22 +476,22 @@ Do you want to automatically run 'make' and rerun command:
 	return false
 }
 
-const trussImportPath = "github.com/metaverse/truss"
+const baronImportPath = "github.com/teamlint/baron"
 
-// makeAndRunTruss installs truss by running make in trussImportPath.
-// It then passes through args to newly installed truss.
-func makeAndRunTruss(args []string) error {
-	p, err := build.Default.Import(trussImportPath, "", build.FindOnly)
+// makeAndRunbaron installs baron by running make in baronImportPath.
+// It then passes through args to newly installed baron.
+func makeAndRunbaron(args []string) error {
+	p, err := build.Default.Import(baronImportPath, "", build.FindOnly)
 	if err != nil {
-		return errors.Wrap(err, "could not find truss directory")
+		return errors.Wrap(err, "could not find baron directory")
 	}
 	make := exec.Command("make")
 	make.Dir = p.Dir
 	err = make.Run()
 	if err != nil {
-		return errors.Wrap(err, "could not run make in truss directory")
+		return errors.Wrap(err, "could not run make in baron directory")
 	}
-	truss := exec.Command("truss", args[1:]...)
-	truss.Stdin, truss.Stdout, truss.Stderr = os.Stdin, os.Stdout, os.Stderr
-	return truss.Run()
+	baron := exec.Command("baron", args[1:]...)
+	baron.Stdin, baron.Stdout, baron.Stderr = os.Stdin, os.Stdout, os.Stderr
+	return baron.Run()
 }
