@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/teamlint/truss/truss/execprotoc"
+	"github.com/teamlint/baron/internal/execprotoc"
 )
 
 // NewFromString creates a Svcdef from a string of a valid protobuf file. Very
@@ -18,7 +18,7 @@ func NewFromString(def string, gopath []string) (*Svcdef, error) {
 	const goFileName = "definition.pb.go"
 
 	// Write our proto file to a directory
-	protoDir, err := ioutil.TempDir("", "trusssvcdef")
+	protoDir, err := ioutil.TempDir("", "baronsvcdef")
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create temp directory to store proto definition")
 	}

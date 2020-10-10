@@ -1,7 +1,7 @@
 package templates
 
 const Hook = `
-package handlers
+package service
 
 import (
 	"fmt"

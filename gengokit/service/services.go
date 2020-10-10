@@ -1,6 +1,6 @@
-// Package handlers manages the exported methods in the service handler code
+// Package service manages the exported methods in the service handler code
 // adding/removing exported methods to match the service definition.
-package handlers
+package service
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/teamlint/baron/gengokit"
-	"github.com/teamlint/baron/gengokit/handlers/templates"
+	"github.com/teamlint/baron/gengokit/service/templates"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -23,12 +23,12 @@ import (
 // it will not be defined in the service definition but is required
 const ignoredFunc = "NewService"
 
-// ServerHadlerPath is the relative path to the server handler template file
-const ServerHandlerPath = "service/service.gotemplate"
+// ServicePath is the relative path to the service template file
+const ServicePath = "service/service.gotemplate"
 
-// New returns a baron.Renderable capable of updating server handlers.
-// New should be passed the previous version of the server handler to parse.
-func New(svc *svcdef.Service, prev io.Reader) (gengokit.Renderable, error) {
+// NewService returns a baron.Renderable capable of updating service.
+// New should be passed the previous version of the service to parse.
+func NewService(svc *svcdef.Service, prev io.Reader) (gengokit.Renderable, error) {
 	var h handler
 	log.WithField("Service Methods", len(svc.Methods)).Debug("Handler being created")
 	h.mMap = newMethodMap(svc.Methods)
@@ -74,7 +74,7 @@ type handlerData struct {
 // Render returns a go code server handler that has functions for all
 // ServiceMethods in the service definition.
 func (h *handler) Render(alias string, data *gengokit.Data) (io.Reader, error) {
-	if alias != ServerHandlerPath {
+	if alias != ServicePath {
 		return nil, errors.Errorf("cannot render unknown file: %q", alias)
 	}
 	if h.ast == nil {

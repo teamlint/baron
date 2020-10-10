@@ -1,16 +1,16 @@
-package handlers
+package service
 
 import (
 	"io"
 
 	"github.com/pkg/errors"
 
-	"github.com/metaverse/truss/gengokit"
-	"github.com/metaverse/truss/gengokit/handlers/templates"
+	"github.com/teamlint/baron/gengokit"
+	"github.com/teamlint/baron/gengokit/service/templates"
 )
 
 // MiddlewaresPath is the path to the middleware gotemplate file.
-const MiddlewaresPath = "handlers/middlewares.gotemplate"
+const MiddlewaresPath = "service/middlewares.gotemplate"
 
 // NewMiddlewares returns a Renderable that renders the middlewares.go file.
 func NewMiddlewares() *Middlewares {

@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/teamlint/baron/gengokit"
-	"github.com/teamlint/baron/gengokit/handlers"
+	"github.com/teamlint/baron/gengokit/service"
 	templFiles "github.com/teamlint/baron/gengokit/template"
 
 	"github.com/teamlint/baron/svcdef"
@@ -59,8 +59,8 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 	actualFP := templatePathToActual(templFP, data.Service.Name)
 
 	switch templFP {
-	case handlers.ServerHandlerPath:
-		h, err := handlers.New(data.Service, prevFile)
+	case service.ServicePath:
+		h, err := service.NewService(data.Service, prevFile)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot parse previous handler: %q", actualFP)
 		}
@@ -68,13 +68,13 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 		if genCode, err = h.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
 		}
-	case handlers.HookPath:
-		hook := handlers.NewHook(prevFile)
+	case service.HookPath:
+		hook := service.NewHook(prevFile)
 		if genCode, err = hook.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
 		}
-	case handlers.MiddlewaresPath:
-		m := handlers.NewMiddlewares()
+	case service.MiddlewaresPath:
+		m := service.NewMiddlewares()
 		m.Load(prevFile)
 		if genCode, err = m.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
