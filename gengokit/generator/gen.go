@@ -6,6 +6,8 @@ import (
 	"go/format"
 	"io"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -32,6 +34,12 @@ func GenerateGokit(sd *svcdef.Svcdef, conf gengokit.Config) (map[string]io.Reade
 	// Remove the suffix "-service" since it's added back in by templatePathToActual
 	svcname := strings.ToLower(sd.Service.Name)
 	for _, templPath := range templFiles.AssetNames() {
+
+		// 排除 pb.baron.go 模板
+		if templPath == service.BaronPath {
+			continue
+		}
+
 		// Re-derive the actual path for this file based on the service output
 		// path provided by the baron main.go
 		actualPath := templatePathToActual(templPath, svcname)
@@ -44,6 +52,28 @@ func GenerateGokit(sd *svcdef.Svcdef, conf gengokit.Config) (map[string]io.Reade
 	}
 
 	return codeGenFiles, nil
+}
+
+// GenerateBaronFile returns a gokit service generated from a service definition (svcdef),
+// the package to the root of the generated service goPackage, the package
+// to the .pb.baron.go service struct files
+func GenerateBaronFile(sd *svcdef.Svcdef, conf gengokit.Config, baronPath string) error {
+	data, err := gengokit.NewData(sd, conf)
+	if err != nil {
+		return errors.Wrap(err, "cannot create baron template data")
+	}
+
+	templPath := service.BaronPath
+	file, err := generateResponseFile(templPath, data, nil)
+	if err != nil {
+		return errors.Wrap(err, "cannot render baron template")
+	}
+	err = WriteGenFile(file, baronPath)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "cannot to write output"))
+	}
+
+	return nil
 }
 
 // generateResponseFile contains logic to choose how to render a template file
@@ -133,4 +163,23 @@ func formatCode(code []byte) []byte {
 	}
 
 	return formatted
+}
+
+// WriteGenFile writes a file at path to the filesystem
+func WriteGenFile(file io.Reader, path string) error {
+	err := os.MkdirAll(filepath.Dir(path), 0777)
+	if err != nil {
+		return err
+	}
+
+	outFile, err := os.Create(path)
+	if err != nil {
+		return errors.Wrapf(err, "cannot create file %v", path)
+	}
+
+	_, err = io.Copy(outFile, file)
+	if err != nil {
+		return errors.Wrapf(err, "cannot write to %v", path)
+	}
+	return outFile.Close()
 }

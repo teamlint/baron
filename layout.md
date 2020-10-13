@@ -9,8 +9,9 @@ sequenceDiagram
 	participant gengokit as gengokit
 	participant handlers as gengokit/handlers
   autonumber
-  
+  note over baron: 下面方法先生成 *.pb.go
   baron ->> baron: cfg, err := parseInput()
+  note over baron: 根据 *.pb.go 文件进行服务分析
   baron ->> baron: sd, err := parseServiceDefinition(cfg)
   activate baron
   baron ->> baron: generateCode(cfg, sd)

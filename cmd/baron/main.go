@@ -118,13 +118,19 @@ func main() {
 		log.Fatal(errors.Wrap(err, "cannot parse input definition proto files"))
 	}
 
+	// generate *.pb.baron.go
+	err = generateBaronCode(cfg, sd)
+	if err != nil {
+		log.Fatal(errors.Wrapf(err, "cannot generate {{.sd.PkgName}}.pb.baron.go"))
+	}
+
 	genFiles, err := generateCode(cfg, sd)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "cannot generate service"))
 	}
 
 	for path, file := range genFiles {
-		err := writeGenFile(file, filepath.Join(cfg.ServicePath, path))
+		err := gengokit.WriteGenFile(file, filepath.Join(cfg.ServicePath, path))
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "cannot to write output"))
 		}
@@ -294,12 +300,41 @@ func generateCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Reader, 
 		VersionDate:   date,
 	}
 
+	// generate go-kit service
 	genGokitFiles, err := gengokit.GenerateGokit(sd, conf)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot generate gokit service")
 	}
 
 	return genGokitFiles, nil
+}
+
+// generateBaronCode
+func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
+	conf := ggkconf.Config{
+		PBPackage:     cfg.PBPackage,
+		GoPackage:     cfg.ServicePackage,
+		PreviousFiles: cfg.PrevGen,
+		Version:       version,
+		VersionDate:   date,
+	}
+
+	protoDefPaths := cfg.DefPaths
+
+	// Get path names of .pb.baron.go files
+	for _, p := range protoDefPaths {
+		base := filepath.Base(p)
+		barename := strings.TrimSuffix(base, filepath.Ext(p))
+		baronPath := filepath.Join(cfg.PBPath, barename+".pb.baron.go")
+
+		// generate go-kit service
+		err := gengokit.GenerateBaronFile(sd, conf, baronPath)
+		if err != nil {
+			return errors.Wrap(err, "cannot generate baron service")
+		}
+	}
+
+	return nil
 }
 
 func openFiles(paths []string) (map[string]io.Reader, error) {
@@ -312,25 +347,6 @@ func openFiles(paths []string) (map[string]io.Reader, error) {
 		rv[p] = reader
 	}
 	return rv, nil
-}
-
-// writeGenFile writes a file at path to the filesystem
-func writeGenFile(file io.Reader, path string) error {
-	err := os.MkdirAll(filepath.Dir(path), 0777)
-	if err != nil {
-		return err
-	}
-
-	outFile, err := os.Create(path)
-	if err != nil {
-		return errors.Wrapf(err, "cannot create file %v", path)
-	}
-
-	_, err = io.Copy(outFile, file)
-	if err != nil {
-		return errors.Wrapf(err, "cannot write to %v", path)
-	}
-	return outFile.Close()
 }
 
 // cleanProtofilePath returns the absolute filepath of a group of files

@@ -4,11 +4,11 @@
 // issues with proto2 clients talking to proto3 servers and vice versa.
 syntax = "proto3";
 
-// The package name determines the name of the directories that truss creates
-// for `package echo;` truss will create the directory "echo-service".
+// The package name determines the name of the directories that baron creates
+// for `package echo;` baron will create the directory "echo-service".
 package echo;
 
-import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
 
 service Echo {
   // Echo "echos" the incoming string

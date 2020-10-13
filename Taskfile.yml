@@ -1,0 +1,70 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  NAME: 'Baron'
+
+tasks:
+  default:
+    cmds:
+      - echo "{{.NAME}}"
+      - task -l
+    silent: true
+
+  build:
+    desc: 'build baron CLI'
+    dir: ./cmd/baron
+    cmds:
+      - go build main.go 
+    silent: true
+
+  run:
+    desc: 'run baron CLI'
+    dir: ./cmd/baron
+    cmds:
+      - go run main.go 
+    silent: true
+
+  bindata:
+    desc: 'generate go-bindata'
+    cmds: 
+      - go generate github.com/teamlint/baron/gengokit/template
+    silent: true
+
+  install:
+    desc: 'install baron CLI'
+    cmds: 
+      - task: bindata
+      - go install -ldflags '-X "main.version={{.VERSION}}" -X "main.date={{.VERSION_DATE}}"' github.com/teamlint/baron/cmd/baron
+    vars:
+      VERSION: 
+        sh: git describe --always --tags --dirty
+      SHA:
+        sh: git rev-parse --short=10 HEAD
+      VERSION_DATE:
+        sh: git show -s --format=%cI {{.HEAD_COMMIT}}
+      HEAD_COMMIT:
+        sh: git rev-parse HEAD
+    silent: false
+
+  example:
+    desc: 'example'
+    dir: './_example'
+    cmds: 
+      - baron echo.proto
+    silent: true
+
+  run-example:
+    desc: 'run example'
+    dir: ./_example/echo-service/cmd/echo
+    cmds:
+      - go run main.go 
+    silent: false
+
+  build-example:
+    desc: 'run example'
+    dir: ./_example/echo-service/cmd/echo
+    cmds:
+      - go build main.go 
+    silent: false

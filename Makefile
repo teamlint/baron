@@ -1,12 +1,12 @@
-# Makefile for Truss.
+# Makefile for baron.
 #
 SHA := $(shell git rev-parse --short=10 HEAD)
 
 MAKEFILE_PATH := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 VERSION_DATE := $(shell $(MAKEFILE_PATH)/commit_date.sh)
 
-# Build native Truss by default.
-default: truss
+# Build native baron by default.
+default: baron
 
 dependencies:
 	go get -u github.com/gogo/protobuf/protoc-gen-gogo@21df5aa0e680850681b8643f0024f92d3b09930c
@@ -16,13 +16,13 @@ dependencies:
 
 # Generate go files containing the all template files in []byte form
 gobindata:
-	go generate github.com/metaverse/truss/gengokit/template
+	go generate github.com/teamlint/baron/gengokit/template
 
-# Install truss
-truss: gobindata
-	go install -ldflags '-X "main.version=$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
+# Install baron
+baron: gobindata
+	go install -ldflags '-X "main.version=$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/teamlint/baron/cmd/baron
 
-# Run the go tests and the truss integration tests
+# Run the go tests and the baron integration tests
 test: test-go test-integration
 
 test-go:
@@ -36,4 +36,4 @@ test-integration:
 testclean:
 	$(MAKE) -C cmd/_integration-tests clean
 
-.PHONY: testclean test-integration test-go test truss gobindata dependencies
+.PHONY: testclean test-integration test-go test baron gobindata dependencies
