@@ -16,7 +16,7 @@ tasks:
     desc: 'build baron CLI'
     dir: ./cmd/baron
     cmds:
-      - go build main.go 
+      - go build -o baron main.go 
     silent: true
 
   run:
@@ -47,6 +47,22 @@ tasks:
       HEAD_COMMIT:
         sh: git rev-parse HEAD
     silent: false
+
+  version:
+    desc: 'print version'
+    cmds: 
+      - echo 'version= {{.VERSION}} date- {{.VERSION_DATE}}'
+    vars:
+      VERSION: 
+        sh: git describe --always --tags --dirty
+      SHA:
+        sh: git rev-parse --short=10 HEAD
+      VERSION_DATE:
+        sh: git show -s --format=%cI {{.HEAD_COMMIT}}
+      HEAD_COMMIT:
+        sh: git rev-parse HEAD
+    silent: true
+
 
   example:
     desc: 'example'
