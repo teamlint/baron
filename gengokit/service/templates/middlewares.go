@@ -4,7 +4,6 @@ const Middlewares = `
 package service
 
 import (
-	// "{{.ImportPath -}} /svc"
 	pb "{{.PBImportPath -}}"
 )
 

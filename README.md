@@ -50,15 +50,13 @@ Try baron for yourself on Echo Service to see the service that is generated:
 baron _example/echo.proto
 ```
 
-See [USAGE.md](./USAGE.md) and [TUTORIAL.md](./TUTORIAL.md) for more details.
+See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more details.
 
 ## 开发
 
-See [DEVELOPING.md](./DEVELOPING.md) for details.
+See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
-- 生成 api.pb.kit.go
-
 - 命令行参数 
   * baron start [proto]
   * baron [option] api.proto ,option 增加transport, 默认all(http|grpc|nrpc等), 生成代码根据传输协议生成不同代码

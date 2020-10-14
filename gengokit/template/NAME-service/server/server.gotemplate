@@ -29,7 +29,6 @@ type Config struct {
 
 func NewEndpoints(svc pb.{{.Service.Name}}Server) pb.Endpoints {
 	// Business domain.
-
 	// Wrap Service with middlewares. See service/middlewares.go
 	svc = service.WrapService(svc)
 

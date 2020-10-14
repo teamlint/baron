@@ -18,7 +18,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/teamlint/baron/baron/execprotoc"
+	"github.com/teamlint/baron/internal/execprotoc"
 	"github.com/teamlint/baron/svcdef/svcparse"
 )
 
