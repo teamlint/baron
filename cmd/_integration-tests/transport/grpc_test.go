@@ -8,8 +8,8 @@ import (
 	"context"
 	"google.golang.org/grpc"
 
-	pb "github.com/metaverse/truss/cmd/_integration-tests/transport/proto"
-	grpcclient "github.com/metaverse/truss/cmd/_integration-tests/transport/transportpermutations-service/svc/client/grpc"
+	pb "github.com/teamlint/baron/cmd/_integration-tests/transport/proto"
+	grpcclient "github.com/teamlint/baron/cmd/_integration-tests/transport/transportpermutations-service/svc/client/grpc"
 )
 
 var grpcAddr string
@@ -18,10 +18,10 @@ func init() { _ = grpcAddr }
 
 func TestCtxToCtxViaGRPCMetadata(t *testing.T) {
 	var req pb.MetaRequest
-	var key, value = "Truss-Auth-Header", "SECRET"
+	var key, value = "baron-Auth-Header", "SECRET"
 	req.Key = key
 
-	// Create a new client telling it to send "Truss-Auth-Header" as a header
+	// Create a new client telling it to send "baron-Auth-Header" as a header
 	conn, err := grpc.Dial(grpcAddr, grpc.WithInsecure(), grpc.WithTimeout(time.Second))
 	svcgrpc, err := grpcclient.New(conn,
 		grpcclient.CtxValuesToSend(key))

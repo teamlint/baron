@@ -58,21 +58,21 @@ func CodeGeneratorRequest(protoPaths, gopath []string) (*plugin.CodeGeneratorReq
 }
 
 // TODO: getProtocOutput is broken because golang protoc plugins no longer can
-// have UTF-8 in the output. This caused protoc-gen-truss-protocast to fail to
+// have UTF-8 in the output. This caused protoc-gen-baron-protocast to fail to
 // output its the protoc AST.
 func getProtocOutput(protoPaths, gopath []string) ([]byte, error) {
-	_, err := exec.LookPath("protoc-gen-truss-protocast")
+	_, err := exec.LookPath("protoc-gen-baron-protocast")
 	if err != nil {
-		return nil, errors.Wrap(err, "protoc-gen-truss-protocast does not exist in $PATH")
+		return nil, errors.Wrap(err, "protoc-gen-baron-protocast does not exist in $PATH")
 	}
 
-	protocOutDir, err := ioutil.TempDir("", "truss-")
+	protocOutDir, err := ioutil.TempDir("", "baron-")
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create temp directory")
 	}
 	defer os.RemoveAll(protocOutDir)
 
-	pluginCall := "--truss-protocast_out=" + protocOutDir
+	pluginCall := "--baron-protocast_out=" + protocOutDir
 
 	err = protoc(protoPaths, gopath, pluginCall)
 	if err != nil {

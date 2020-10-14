@@ -208,7 +208,7 @@ sequenceDiagram
 │   │   └── token.go
 │   ├── test-go.txt
 │   └── test-proto.txt
-├── truss
+├── baron
 │   ├── config.go
 │   ├── execprotoc 执行protoc命令
 │   │   └── execprotoc.go
@@ -344,15 +344,15 @@ sequenceDiagram
 ```shell
 DEBU[0000]                                               GOPATH="[/Users/venjiang/gopath]"
 DEBU[0000]                                               rawDefPath=./api/hello/fetcher.proto
-DEBU[0000]                                               DefPaths="[/Users/venjiang/gopath/src/test/truss-demo/api/hello/fetcher.proto]"
-DEBU[0000]                                               PB Package=test/truss-demo/api/hello
-DEBU[0000]                                               PB Path=/Users/venjiang/gopath/src/test/truss-demo/api/hello
+DEBU[0000]                                               DefPaths="[/Users/venjiang/gopath/src/test/baron-demo/api/hello/fetcher.proto]"
+DEBU[0000]                                               PB Package=test/baron-demo/api/hello
+DEBU[0000]                                               PB Path=/Users/venjiang/gopath/src/test/baron-demo/api/hello
 DEBU[0000]                                               svcDirName=fetcher-service
-DEBU[0000]                                               svcPath=/Users/venjiang/gopath/src/test/truss-demo/api/hello/fetcher-service
-DEBU[0000]                                               Service Packages="[test/truss-demo/api/hello/fetcher-service]"
-DEBU[0000]                                               Service Package=test/truss-demo/api/hello/fetcher-service
+DEBU[0000]                                               svcPath=/Users/venjiang/gopath/src/test/baron-demo/api/hello/fetcher-service
+DEBU[0000]                                               Service Packages="[test/baron-demo/api/hello/fetcher-service]"
+DEBU[0000]                                               Service Package=test/baron-demo/api/hello/fetcher-service
 DEBU[0000]                                               package name=
-DEBU[0000]                                               Service Path=/Users/venjiang/gopath/src/test/truss-demo/api/hello/fetcher-service
+DEBU[0000]                                               Service Path=/Users/venjiang/gopath/src/test/baron-demo/api/hello/fetcher-service
 DEBU[0000] Handler being created                         Service Methods=3
 ```
 

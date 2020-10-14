@@ -13,7 +13,7 @@ github.com/teamlint/baron/cmd/baron
   │ ├ io
   │ ├ strings
   │ ├ text/template
-  │ ├ github.com/metaverse/truss/gengokit/httptransport
+  │ ├ github.com/teamlint/baron/gengokit/httptransport
   │ │ ├ bytes
   │ │ ├ fmt
   │ │ ├ go/ast
@@ -27,8 +27,8 @@ github.com/teamlint/baron/cmd/baron
   │ │ ├ strings
   │ │ ├ text/template
   │ │ ├ unicode
-  │ │ ├ github.com/metaverse/truss/gengokit/httptransport/templates
-  │ │ ├ github.com/metaverse/truss/svcdef
+  │ │ ├ github.com/teamlint/baron/gengokit/httptransport/templates
+  │ │ ├ github.com/teamlint/baron/svcdef
   │ │ │ ├ fmt
   │ │ │ ├ go/ast
   │ │ │ ├ go/parser
@@ -40,7 +40,7 @@ github.com/teamlint/baron/cmd/baron
   │ │ │ ├ reflect
   │ │ │ ├ regexp
   │ │ │ ├ strings
-  │ │ │ ├ github.com/metaverse/truss/svcdef/svcparse
+  │ │ │ ├ github.com/teamlint/baron/svcdef/svcparse
   │ │ │ │ ├ bufio
   │ │ │ │ ├ bytes
   │ │ │ │ ├ fmt
@@ -49,22 +49,22 @@ github.com/teamlint/baron/cmd/baron
   │ │ │ │ ├ strconv
   │ │ │ │ ├ strings
   │ │ │ │ ├ unicode
-  │ │ │ │ └ github.com/metaverse/truss/vendor/github.com/pkg/errors
-  │ │ │ ├ github.com/metaverse/truss/truss/execprotoc
+  │ │ │ │ └ github.com/teamlint/baron/vendor/github.com/pkg/errors
+  │ │ │ ├ github.com/teamlint/baron/baron/execprotoc
   │ │ │ │ ├ io/ioutil
   │ │ │ │ ├ os
   │ │ │ │ ├ os/exec
   │ │ │ │ ├ path/filepath
-  │ │ │ │ ├ github.com/metaverse/truss/vendor/github.com/gogo/protobuf/proto
-  │ │ │ │ ├ github.com/metaverse/truss/vendor/github.com/gogo/protobuf/protoc-gen-gogo/plugin
-  │ │ │ │ └ github.com/metaverse/truss/vendor/github.com/pkg/errors
-  │ │ │ ├ github.com/metaverse/truss/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
-  │ │ │ ├ github.com/metaverse/truss/vendor/github.com/pkg/errors
-  │ │ │ └ github.com/metaverse/truss/vendor/github.com/sirupsen/logrus
-  │ │ ├ github.com/metaverse/truss/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
-  │ │ ├ github.com/metaverse/truss/vendor/github.com/pkg/errors
-  │ │ └ github.com/metaverse/truss/vendor/github.com/sirupsen/logrus
-  │ ├ github.com/metaverse/truss/svcdef
+  │ │ │ │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/proto
+  │ │ │ │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/protoc-gen-gogo/plugin
+  │ │ │ │ └ github.com/teamlint/baron/vendor/github.com/pkg/errors
+  │ │ │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
+  │ │ │ ├ github.com/teamlint/baron/vendor/github.com/pkg/errors
+  │ │ │ └ github.com/teamlint/baron/vendor/github.com/sirupsen/logrus
+  │ │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
+  │ │ ├ github.com/teamlint/baron/vendor/github.com/pkg/errors
+  │ │ └ github.com/teamlint/baron/vendor/github.com/sirupsen/logrus
+  │ ├ github.com/teamlint/baron/svcdef
   │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
   │ │ ├ bufio
   │ │ ├ bytes
@@ -145,16 +145,16 @@ github.com/teamlint/baron/cmd/baron
   │ │ ├ go/token
   │ │ ├ io
   │ │ ├ strings
-  │ │ ├ github.com/metaverse/truss/gengokit
+  │ │ ├ github.com/teamlint/baron/gengokit
   │ │ │ ├ bytes
   │ │ │ ├ io
   │ │ │ ├ strings
   │ │ │ ├ text/template
-  │ │ │ ├ github.com/metaverse/truss/gengokit/httptransport
-  │ │ │ ├ github.com/metaverse/truss/svcdef
-  │ │ │ ├ github.com/metaverse/truss/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
-  │ │ │ └ github.com/metaverse/truss/vendor/github.com/pkg/errors
-  │ │ ├ github.com/metaverse/truss/gengokit/handlers/templates
+  │ │ │ ├ github.com/teamlint/baron/gengokit/httptransport
+  │ │ │ ├ github.com/teamlint/baron/svcdef
+  │ │ │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
+  │ │ │ └ github.com/teamlint/baron/vendor/github.com/pkg/errors
+  │ │ ├ github.com/teamlint/baron/gengokit/handlers/templates
   │ │ ├ github.com/teamlint/baron/gengokit
   │ │ ├ github.com/teamlint/baron/gengokit/handlers/templates
   │ │ ├ github.com/teamlint/baron/svcdef
@@ -172,8 +172,8 @@ github.com/teamlint/baron/cmd/baron
   │ │ │ ├ github.com/teamlint/baron/vendor/github.com/gogo/protobuf/protoc-gen-gogo/generator
   │ │ │ ├ github.com/teamlint/baron/vendor/github.com/pkg/errors
   │ │ │ ├ github.com/teamlint/baron/vendor/github.com/sirupsen/logrus
-  │ │ │ ├ github.com/teamlint/truss/svcdef/svcparse (unresolved)
-  │ │ │ └ github.com/teamlint/truss/truss/execprotoc (unresolved)
+  │ │ │ ├ github.com/teamlint/baron/svcdef/svcparse (unresolved)
+  │ │ │ └ github.com/teamlint/baron/baron/execprotoc (unresolved)
   │ │ ├ github.com/teamlint/baron/vendor/github.com/pkg/errors
   │ │ └ github.com/teamlint/baron/vendor/github.com/sirupsen/logrus
   │ ├ github.com/teamlint/baron/gengokit/template

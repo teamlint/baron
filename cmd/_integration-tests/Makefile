@@ -20,29 +20,29 @@ all: test
 
 test: clean test-transport test-middlewares test-server
 
-truss:
-	go install -ldflags '-X "main.version=$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/metaverse/truss/cmd/truss
+baron:
+	go install -ldflags '-X "main.version=$(SHA)" -X "main.date=$(VERSION_DATE)"' github.com/teamlint/baron/cmd/baron
 
-test-transport: truss
-	@which truss
+test-transport: baron
+	@which baron
 	@printf '$(TRANSPORT_TEST_MSG)'
 	$(MAKE) -C transport
-	rm -f ./truss
+	rm -f ./baron
 
-test-middlewares: truss
-	@which truss
+test-middlewares: baron
+	@which baron
 	@printf '$(MIDDLEWARES_TEST_MSG)'
 	$(MAKE) -C middlewares
-	rm -f ./truss
+	rm -f ./baron
 
-test-server: truss
-	@which truss
+test-server: baron
+	@which baron
 	@printf '$(SERVER_TEST_MSG)'
 	go test -v ./server
-	rm -f ./truss
+	rm -f ./baron
 
 clean:
-	rm -f ./truss
+	rm -f ./baron
 	go test ./server -clean
 	$(MAKE) -C transport clean
 	$(MAKE) -C middlewares clean

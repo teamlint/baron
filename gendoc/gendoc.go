@@ -1,4 +1,4 @@
-// Package gendoc is a truss plugin to generate markdown documentation for a
+// Package gendoc is a baron plugin to generate markdown documentation for a
 // protobuf definition file.
 package gendoc
 
@@ -6,7 +6,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/metaverse/truss/deftree"
+	"github.com/teamlint/baron/deftree"
 )
 
 func findServiceName(md *deftree.MicroserviceDefinition) string {

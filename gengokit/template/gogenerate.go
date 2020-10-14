@@ -5,6 +5,6 @@
 
 	The command uses go-bindata to generate binary data from the template files
 	stored in ./NAME-service. This binary date is stored in template.go
-	which is then compiled into the protoc-gen-truss-gokit binary.
+	which is then compiled into the protoc-gen-baron-gokit binary.
 */
 package template

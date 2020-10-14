@@ -15,7 +15,7 @@ func TestFromPaths(t *testing.T) {
 	syntax = "proto3";
 	package echo;
 
-	import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+	import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
 
 	service BounceEcho {
 	  rpc Echo (EchoRequest) returns (EchoResponse) {
@@ -36,7 +36,7 @@ func TestFromPaths(t *testing.T) {
 		t.Fatal("cannot create temp directory to store proto definition: ", err)
 	}
 	defer os.RemoveAll(protoDir)
-	f, err := ioutil.TempFile(protoDir, "trusstest")
+	f, err := ioutil.TempFile(protoDir, "barontest")
 	_, err = io.Copy(f, strings.NewReader(protoStr))
 	if err != nil {
 		t.Fatal("couldn't copy contents of our proto file into the os.File: ", err)
@@ -61,7 +61,7 @@ func TestFromReader(t *testing.T) {
 	syntax = "proto3";
 	package echo;
 
-	import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+	import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
 
 	service BounceEcho {
 	  rpc Echo (EchoRequest) returns (EchoResponse) {

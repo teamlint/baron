@@ -3,7 +3,7 @@
 
 # `gendocs`
 
-A `truss` plugin which can generate documentation from an annotated Protobuf definition file. Handles http-options.
+A `baron` plugin which can generate documentation from an annotated Protobuf definition file. Handles http-options.
 
 ## Limitations and Bugs
 

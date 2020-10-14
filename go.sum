@@ -151,8 +151,8 @@ github.com/mattn/go-isatty v0.0.3/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNx
 github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
 github.com/mattn/go-runewidth v0.0.2/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
-github.com/metaverse/truss v0.2.0 h1:Ifa1+BVDFHCHIt9K0rVTOlz31kOPwN9mJuoEgrwIzDQ=
-github.com/metaverse/truss v0.2.0/go.mod h1:RG/YW1BDlMvSkxyo5RownkVDAIhRUVTcKsuQ6U4E3L8=
+github.com/teamlint/baron v0.2.0 h1:Ifa1+BVDFHCHIt9K0rVTOlz31kOPwN9mJuoEgrwIzDQ=
+github.com/teamlint/baron v0.2.0/go.mod h1:RG/YW1BDlMvSkxyo5RownkVDAIhRUVTcKsuQ6U4E3L8=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/mitchellh/cli v1.0.0/go.mod h1:hNIlj7HEI86fIcpObd7a0FcrxTWetlwJDGcceTlRvqc=
 github.com/mitchellh/go-homedir v1.0.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=

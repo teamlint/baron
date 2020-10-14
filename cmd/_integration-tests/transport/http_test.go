@@ -15,8 +15,8 @@ import (
 	// 3d Party
 	"context"
 	// This Service
-	pb "github.com/metaverse/truss/cmd/_integration-tests/transport/proto"
-	httpclient "github.com/metaverse/truss/cmd/_integration-tests/transport/transportpermutations-service/svc/client/http"
+	pb "github.com/teamlint/baron/cmd/_integration-tests/transport/proto"
+	httpclient "github.com/teamlint/baron/cmd/_integration-tests/transport/transportpermutations-service/svc/client/http"
 
 	"github.com/gogo/protobuf/jsonpb"
 	"github.com/moul/http2curl"
@@ -119,7 +119,7 @@ func TestGetWithRepeatedQueryRequest(t *testing.T) {
 
 func TestGetWithRepeatedStringQueryClient(t *testing.T) {
 	var req pb.GetWithRepeatedStringQueryRequest
-	req.A = []string{"Hello", "truss"}
+	req.A = []string{"Hello", "baron"}
 	want := req.A[0] + req.A[1]
 
 	svchttp, err := httpclient.New(httpAddr)
@@ -141,7 +141,7 @@ func TestGetWithRepeatedStringQueryRequest(t *testing.T) {
 	resp := pb.GetWithRepeatedStringQueryResponse{}
 
 	var A []string
-	A = []string{"Hello", "truss"}
+	A = []string{"Hello", "baron"}
 	expects := pb.GetWithRepeatedStringQueryResponse{
 		V: A[0] + A[1],
 	}
@@ -318,10 +318,10 @@ func TestPostWithNestedMessageBodyRequest(t *testing.T) {
 
 func TestCtxToCtxViaHTTPHeaderClient(t *testing.T) {
 	var req pb.MetaRequest
-	var key, value = "Truss-Auth-Header", "SECRET"
+	var key, value = "baron-Auth-Header", "SECRET"
 	req.Key = key
 
-	// Create a new client telling it to send "Truss-Auth-Header" as a header
+	// Create a new client telling it to send "baron-Auth-Header" as a header
 	svchttp, err := httpclient.New(httpAddr,
 		httpclient.CtxValuesToSend(key))
 	if err != nil {
@@ -367,7 +367,7 @@ func TestEchoOddNamesClient(t *testing.T) {
 
 func TestCtxToCtxViaHTTPHeaderRequest(t *testing.T) {
 	var resp pb.MetaResponse
-	var key, value = "Truss-Auth-Header", "SECRET"
+	var key, value = "baron-Auth-Header", "SECRET"
 
 	jsonStr := fmt.Sprintf(`{ "Key": %q }`, key)
 	fmt.Println(jsonStr)
@@ -536,7 +536,7 @@ func TestStrangeRPCName(t *testing.T) {
 	}
 }
 
-// Test that if a truss client receives a non-json response from a "truss"
+// Test that if a baron client receives a non-json response from a "baron"
 // server, that we put that response body in the error message. To allow for
 // developers to see the request body in the errors.
 func TestNonJSONResponseBodyFromClientCallIsInError(t *testing.T) {
@@ -578,7 +578,7 @@ func TestNonJSONResponseBodyFromClientCallIsLessThan8KB(t *testing.T) {
 	t.Log("Non JSON response length", l)
 }
 
-// Test that if a truss server receives a non-json request, we put that request
+// Test that if a baron server receives a non-json request, we put that request
 // body in the error message. To allow for developers to see the request body in the errors.
 func TestNonJSONRequestBodyIsInError(t *testing.T) {
 	// Put some bad data into the body
@@ -716,7 +716,7 @@ func TestHTTPErrorStatusCodeAndHeaders(t *testing.T) {
 	}
 }
 
-// Test that if a truss server receives a non-json request, that the status code is 400 http.StatusBadRequest
+// Test that if a baron server receives a non-json request, that the status code is 400 http.StatusBadRequest
 // body in the error message. To allow for developers to see the request body in the errors.
 func TestNonJSONRequestBodyReturnsResponseWithStatusCode400(t *testing.T) {
 	// Put some bad data into the body

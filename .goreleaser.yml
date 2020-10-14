@@ -1,9 +1,9 @@
-project_name: truss
+project_name: baron
 
 release:
   github:
-    owner: metaverse
-    name: truss
+    owner: teamlint
+    name: baron
   name_template: '{{.Tag}}'
 
 # .goreleaser.yml
@@ -11,12 +11,12 @@ brews:
   -
     # Name template of the recipe
     # Default to project name
-    name: truss
+    name: baron
 
     # GitHub/GitLab repository to push the formula to
     # Gitea is not supported yet, but the support coming
     tap:
-      owner: metaverse
+      owner: teamlint
       name: homebrew-tap
 
     commit_author:
@@ -25,11 +25,11 @@ brews:
 
     # Caveats for the user of your binary.
     # Default is empty.
-    caveats: "To leverage truss's annotations you'll need to clone truss into your $(go env GOPATH)"
+    caveats: "To leverage baron's annotations you'll need to clone baron into your $(go env GOPATH)"
 
-    homepage: "https://github.com/metaverse/truss"
+    homepage: "https://github.com/teamlint/baron"
 
-    description: "Truss helps you build go-kit microservices without having to worry about writing or maintaining boilerplate code"
+    description: "baron helps you build go-kit microservices without having to worry about writing or maintaining boilerplate code"
 
     # Packages your package depends on.
     dependencies:
@@ -40,7 +40,7 @@ brews:
     # So you can `brew test` your formula.
     # Default is empty.
     test: |
-      system "#{bin}/truss --version"
+      system "#{bin}/baron --version"
       protofile = testpath/"proto3.proto"
       protofile.write <<~EOS
         syntax = "proto3";
@@ -53,7 +53,7 @@ brews:
           string text = 1;
         }
       EOS
-      system "#{bin}/truss", "proto3.proto"
+      system "#{bin}/baron", "proto3.proto"
       assert_predicate testpath/"proto3.pb.go", :exist?
       assert_predicate testpath/echo-service, :exist?
       refute_predicate (testpath/"proto3.pb.go").size, :zero?
@@ -61,7 +61,7 @@ brews:
     # Custom install script for brew.
     # Default is 'bin.install "program"'.
     install: |
-      bin.install "truss"
+      bin.install "baron"
 
 builds:
   - goos:
@@ -73,9 +73,9 @@ builds:
       - "386"
     env:
       - CGO_ENABLED=0
-    main: cmd/truss/main.go
+    main: cmd/baron/main.go
     ldflags: -s -w -X main.version={{.Version}} -X main.date={{.CommitDate}}
-    binary: truss
+    binary: baron
 
 archives:
   -

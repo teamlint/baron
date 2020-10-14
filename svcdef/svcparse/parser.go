@@ -278,7 +278,7 @@ func ParseMethod(lex *SvcLexer) (*Method, error) {
 	}
 
 	// Looping here handles for request types from other packages
-	// (google.protobuf.Struct). Only the last ident is kept as truss
+	// (google.protobuf.Struct). Only the last ident is kept as baron
 	// doesn't support properly importanting external packages, but by
 	// using this approach type aliases can be made alongside the generated
 	// pb.go code (type Struct = types.Struct)
@@ -329,7 +329,7 @@ func ParseMethod(lex *SvcLexer) (*Method, error) {
 	}
 
 	// Looping here handles for response types from other packages
-	// (google.protobuf.Struct). Only the last ident is kept as truss
+	// (google.protobuf.Struct). Only the last ident is kept as baron
 	// doesn't support properly importanting external packages, but by
 	// using this approach type aliases can be made alongside the generated
 	// pb.go code (type Struct = types.Struct)

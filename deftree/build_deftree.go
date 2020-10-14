@@ -12,14 +12,14 @@ import (
 	"path/filepath"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/metaverse/truss/svcdef/svcparse"
-	"github.com/metaverse/truss/truss/execprotoc"
+	"github.com/teamlint/baron/baron/execprotoc"
+	"github.com/teamlint/baron/svcdef/svcparse"
 )
 
 var gengo *generator.Generator
@@ -85,7 +85,7 @@ func New(req *plugin.CodeGeneratorRequest, serviceFile io.Reader) (Deftree, erro
 func NewFromString(def string, gopath []string) (Deftree, error) {
 	const defFileName = "definition.proto"
 
-	protoDir, err := ioutil.TempDir("", "truss-deftree-")
+	protoDir, err := ioutil.TempDir("", "baron-deftree-")
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot create temp directory to store proto definition")
 	}

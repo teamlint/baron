@@ -67,14 +67,14 @@ func TestMain(m *testing.M) {
 	}
 	path := filepath.Join(basePath, "0-basic")
 
-	err = createTrussService(path)
+	err = createbaronService(path)
 	if err != nil {
-		fmt.Printf("cannot create truss service: %v", err)
+		fmt.Printf("cannot create baron service: %v", err)
 		return
 	}
 	err = buildTestService(filepath.Join(path, "test-service"))
 	if err != nil {
-		fmt.Printf("cannot build truss service: %v", err)
+		fmt.Printf("cannot build baron service: %v", err)
 		return
 	}
 	exitCode = m.Run()
@@ -110,9 +110,9 @@ func TestBasicTypes(t *testing.T) {
 }
 
 func TestBasicTypesWithRelSVCOutFlag(t *testing.T) {
-	svcOut := "./metaverse"
+	svcOut := "./teamlint"
 	path := filepath.Join(basePath, "1-basic")
-	err := createTrussService(path, "--svcout", svcOut)
+	err := createbaronService(path, "--svcout", svcOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -123,9 +123,9 @@ func TestBasicTypesWithRelSVCOutFlag(t *testing.T) {
 }
 
 func TestBasicTypesWithTrailingSlashSVCOutFlag(t *testing.T) {
-	svcOut := "./metaverse/"
+	svcOut := "./teamlint/"
 	path := filepath.Join(basePath, "1-basic")
-	err := createTrussService(path, "--svcout", svcOut)
+	err := createbaronService(path, "--svcout", svcOut)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -154,7 +154,7 @@ func _TestMapTypes(t *testing.T) {
 
 func TestGRPCOnly(t *testing.T) {
 	path := filepath.Join(basePath, "5-grpconly")
-	err := createTrussService(path)
+	err := createbaronService(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -175,15 +175,15 @@ func TestCustomHTTPVerbs(t *testing.T) {
 
 func TestMessageOnly(t *testing.T) {
 	path := filepath.Join(basePath, "8-message_only")
-	err := createTrussService(path)
+	err := createbaronService(path)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
-func testEndToEnd(defDir string, subcmd string, t *testing.T, trussOptions ...string) {
+func testEndToEnd(defDir string, subcmd string, t *testing.T, baronOptions ...string) {
 	path := filepath.Join(basePath, defDir)
-	err := createTrussService(path, trussOptions...)
+	err := createbaronService(path, baronOptions...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -213,20 +213,20 @@ func testEndToEnd(defDir string, subcmd string, t *testing.T, trussOptions ...st
 	}
 }
 
-func createTrussService(path string, trussFlags ...string) error {
-	trussOut, err := truss(path, trussFlags...)
+func createbaronService(path string, baronFlags ...string) error {
+	baronOut, err := baron(path, baronFlags...)
 
-	// If truss fails, test error and skip communication
+	// If baron fails, test error and skip communication
 	if err != nil {
-		return errors.Errorf("Truss generation FAILED - %v\nTruss Output:\n%v Error:\n%v", path, trussOut, err)
+		return errors.Errorf("baron generation FAILED - %v\nbaron Output:\n%v Error:\n%v", path, baronOut, err)
 	}
 
 	return nil
 }
 
-// truss calls truss on *.proto in path
-// Truss logs to Stdout when generation passes or fails
-func truss(path string, options ...string) (string, error) {
+// baron calls baron on *.proto in path
+// baron logs to Stdout when generation passes or fails
+func baron(path string, options ...string) (string, error) {
 	var protofiles []string
 	files, err := ioutil.ReadDir(path)
 	for _, f := range files {
@@ -240,18 +240,18 @@ func truss(path string, options ...string) (string, error) {
 
 	args := append(options, protofiles...)
 	args = append(args, "-v")
-	trussExec := exec.Command(
-		"truss",
+	baronExec := exec.Command(
+		"baron",
 		args...,
 	)
-	trussExec.Dir = path
+	baronExec.Dir = path
 
-	out, err := trussExec.CombinedOutput()
+	out, err := baronExec.CombinedOutput()
 
 	return string(out), err
 }
 
-// buildTestService builds a truss service with the package "test"
+// buildTestService builds a baron service with the package "test"
 // into the `serviceDir`/bin directory
 func buildTestService(serviceDir string) (err error) {
 	wd, err := os.Getwd()
@@ -302,7 +302,7 @@ func goBuild(name, outputPath, relCodePath string, errChan chan error) {
 }
 
 func runServer(path string, flags ...string) (*exec.Cmd, *bytes.Buffer, chan error) {
-	// From within a folder with a truss `service`
+	// From within a folder with a baron `service`
 	// These are the paths to the compiled binaries
 	const relativeServerPath = "/bin/test"
 
@@ -386,11 +386,11 @@ func cleanTests(servicesDir string) {
 	}
 }
 
-// removeTestFiles removes all files created by running truss and building the
+// removeTestFiles removes all files created by running baron and building the
 // service from a single definition directory
 func removeTestFiles(defDir string) {
 	// svcout dir
-	os.RemoveAll(filepath.Join(defDir, "metaverse"))
+	os.RemoveAll(filepath.Join(defDir, "teamlint"))
 	// service dir
 	os.RemoveAll(filepath.Join(defDir, "test-service"))
 	// where the binaries are compiled to
