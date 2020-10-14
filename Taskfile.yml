@@ -51,7 +51,7 @@ tasks:
   version:
     desc: 'print version'
     cmds: 
-      - echo 'version= {{.VERSION}} date- {{.VERSION_DATE}}'
+      - echo 'version={{.VERSION}} date={{.VERSION_DATE}}'
     vars:
       VERSION: 
         sh: git describe --always --tags --dirty
