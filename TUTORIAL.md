@@ -1,4 +1,4 @@
-# Tutorial: Getting Started with Truss
+# Tutorial: Getting Started with baron
 
 We will build a simple service based on [echo.proto](./_example/echo.proto)
 
@@ -6,11 +6,11 @@ We will build a simple service based on [echo.proto](./_example/echo.proto)
 
 1. Follow instructions in the [README](./README.md)
   - Can use `brew install` to get protobuf, golang, but not other packages (`go get` the rest).
-2. Go to truss installation folder and run `make test`
+2. Go to baron installation folder and run `make test`
   If everything passes you’re good to go.
   If you see any complaints about packages not installed, `go get` those packages
   If you encounter any other issues - ask the developers
-3. To update to newer version of truss, do `git pull`, or `go get -u github.com/metaverse/truss/...` truss again.
+3. To update to newer version of baron, do `git pull`, or `go get -u github.com/teamlint/baron/...` baron again.
 
 # Writing your first service
 
@@ -36,7 +36,7 @@ message LouderRequest {
 The RPC calls can be annotated with HTTP transport option (endpoint name and type of request). For this we must import the google annotations library.
 
 ```
-import "github.com/metaverse/truss/deftree/googlethirdparty/annotations.proto";
+import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
 
 service Echo {
 ...
@@ -64,7 +64,7 @@ The service definition can be split across multiple proto files. However, it is 
 
 ## Understanding generated file structures
 
-In your terminal, go to the folder containing echo.proto and run `truss *.proto` command. This will generate the service folder (by default at the same level as the proto files). The command will succeed silently. Your directory will now look like this:
+In your terminal, go to the folder containing echo.proto and run `baron *.proto` command. This will generate the service folder (by default at the same level as the proto files). The command will succeed silently. Your directory will now look like this:
 
 ```
 .
@@ -89,7 +89,7 @@ From the top down, within `echo-service/`:
 
 If you try to build and run your service now, it will respond with empty messages. There is no business logic yet! We shall add it in the next step.
 
-You can safely modify only the files in handlers/. Changes to any other files will be lost the next time you re-generate the service with truss.
+You can safely modify only the files in handlers/. Changes to any other files will be lost the next time you re-generate the service with baron.
 
 ## Implement business logic
 
@@ -150,12 +150,12 @@ The following is left as an exercise to the reader:
     - code the logic inside the stub
     - now separate this logic into an unexported helper function
   - Define a new RPC call in echo.proto
-    - regenerate service with truss, check that your old logic remains
+    - regenerate service with baron, check that your old logic remains
     - implement the logic for your new call in a separate package, place it ouside of echo-service
     - wire in the new logic by importing the package in the `handlers.go`
   Suggestion: Save everything the service hears and echo all of it back. See repeated types (protobuf), package variables and init() function (golang).
   - Remove an RPC call definition from echo.proto
-  	- regenerate service with truss, verify that the call no longer exists
+  	- regenerate service with baron, verify that the call no longer exists
   - Break things
   - Launch the server on a different port, or different machine, and talk to it (hint: run `./server_main -h`)
   - Try running multiple servers at once
@@ -164,7 +164,7 @@ The following is left as an exercise to the reader:
 
 ## File placement
 
-You can control the location of the output folders for your service by specifying the following flags when running truss
+You can control the location of the output folders for your service by specifying the following flags when running baron
 ```
   --svcout {go-style-package-path to where you want the contents of {Name}-service folder to be}
   --pbout {go-style-package-path to where you want the *.pb.go interface definitions to be}
@@ -173,9 +173,9 @@ You can control the location of the output folders for your service by specifyin
 Note: “go-style-package-path” means exactly the style you use in your golang import statements, relative to your $GOPATH. This is not your system file path, nor it is relative to location of the *.proto file; the start of the path must be accessible from your $GOPATH.
 For example:
 ```
-truss --pbout truss-demo/interface-defs --svcout truss-demo/service echo.proto
+baron --pbout baron-demo/interface-defs --svcout baron-demo/service echo.proto
 ```
-Executing this command will place the *.pb.go files into `$GOPATH/truss-demo/interface-defs/`, and the entire echo-service contents (excepting the *.pb.go files) to `$GOPATH/truss-demo/service/`.
+Executing this command will place the *.pb.go files into `$GOPATH/baron-demo/interface-defs/`, and the entire echo-service contents (excepting the *.pb.go files) to `$GOPATH/baron-demo/service/`.
 
 ## Middlewares
 

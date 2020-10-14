@@ -15,7 +15,6 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/teamlint/baron/gengokit/httptransport/templates"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -35,8 +34,8 @@ func NewHelper(svc *svcdef.Service) *Helper {
 	// The HTTPAssistFuncs global is a group of function literals defined
 	// within templates.go
 	rv := Helper{
-		ServerTemplate: GenServerTemplate,
-		ClientTemplate: GenClientTemplate,
+		// ServerTemplate: GenServerTemplate,
+		// ClientTemplate: GenClientTemplate,
 	}
 	for _, meth := range svc.Methods {
 		if len(meth.Bindings) > 0 {
@@ -185,45 +184,45 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 	return &nBinding
 }
 
-func GenServerTemplate(exec interface{}) (string, error) {
-	code, err := ApplyTemplate("ServerTemplate", templates.ServerTemplate, exec, TemplateFuncs)
-	if err != nil {
-		return "", err
-	}
-	code = FormatCode(code)
-	return code, nil
-}
+// func GenServerTemplate(exec interface{}) (string, error) {
+// 	code, err := ApplyTemplate("ServerTemplate", templates.ServerTemplate, exec, TemplateFuncs)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	code = FormatCode(code)
+// 	return code, nil
+// }
 
-func GenClientTemplate(exec interface{}) (string, error) {
-	code, err := ApplyTemplate("ClientTemplate", templates.ClientTemplate, exec, TemplateFuncs)
-	if err != nil {
-		return "", err
-	}
-	code = FormatCode(code)
-	return code, nil
-}
+// func GenClientTemplate(exec interface{}) (string, error) {
+// 	code, err := ApplyTemplate("ClientTemplate", templates.ClientTemplate, exec, TemplateFuncs)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	code = FormatCode(code)
+// 	return code, nil
+// }
 
 // GenServerDecode returns the generated code for the server-side decoding of
 // an http request into its request struct.
-func (b *Binding) GenServerDecode() (string, error) {
-	code, err := ApplyTemplate("ServerDecodeTemplate", templates.ServerDecodeTemplate, b, TemplateFuncs)
-	if err != nil {
-		return "", err
-	}
-	code = FormatCode(code)
-	return code, nil
-}
+// func (b *Binding) GenServerDecode() (string, error) {
+// 	code, err := ApplyTemplate("ServerDecodeTemplate", templates.ServerDecodeTemplate, b, TemplateFuncs)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	code = FormatCode(code)
+// 	return code, nil
+// }
 
-// GenClientEncode returns the generated code for the client-side encoding of
-// that clients request struct into the correctly formatted http request.
-func (b *Binding) GenClientEncode() (string, error) {
-	code, err := ApplyTemplate("ClientEncodeTemplate", templates.ClientEncodeTemplate, b, TemplateFuncs)
-	if err != nil {
-		return "", err
-	}
-	code = FormatCode(code)
-	return code, nil
-}
+// // GenClientEncode returns the generated code for the client-side encoding of
+// // that clients request struct into the correctly formatted http request.
+// func (b *Binding) GenClientEncode() (string, error) {
+// 	code, err := ApplyTemplate("ClientEncodeTemplate", templates.ClientEncodeTemplate, b, TemplateFuncs)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	code = FormatCode(code)
+// 	return code, nil
+// }
 
 // PathSections returns a slice of strings for templating the creation of a
 // fully assembled URL with the correct fields in the correct locations.

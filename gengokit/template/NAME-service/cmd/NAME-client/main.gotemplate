@@ -1,0 +1,89 @@
+package main
+
+import (
+	"context"
+	"flag"
+	"log"
+
+	pb "{{.PBImportPath -}}"
+
+	"github.com/guonaihong/gout"
+
+	"google.golang.org/grpc"
+)
+
+var (
+	grpcAddr string
+	httpAddr string
+)
+
+func init() {
+	flag.StringVar(&grpcAddr, "grpc.addr", ":5040", "gRPC (HTTP) listen address")
+	flag.StringVar(&httpAddr, "http.addr", ":5050", "HTTP listen address")
+}
+
+func main() {
+	flag.Parse()
+	// grpc connection
+	conn, err := grpc.Dial(
+		grpcAddr,
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+	pln()
+	// baron grpc client
+	baronGrpcClient, err := pb.NewGRPCClient(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	ctx := context.Background()
+	in := pb.EchoRequest{
+		In: "baron.grpc EchoRequest",
+	}
+	out, err := baronGrpcClient.Echo(ctx, &in)
+	if err != nil {
+		log.Printf("[Baron.GRPCClient] Echo err=%v\n", err)
+		return
+	}
+	log.Printf("[Baron.GRPCClient] Echo result=%+v\n", *out)
+	pln()
+	// grpc client
+	grpcClient := pb.NewEchoClient(conn)
+	in.In = "grpc EchoRequest"
+	out, err = grpcClient.Echo(ctx, &in)
+	if err != nil {
+		log.Printf("[GRPCClient] Echo err=%v\n", err)
+		return
+	}
+	log.Printf("[GRPCClient] Echo result=%+v\n", *out)
+	pln()
+	// baron http client
+	baronHttpClient, err := pb.NewHTTPClient(httpAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	in.In = "baron.http EchoRequest"
+	out, err = baronHttpClient.Echo(ctx, &in)
+	if err != nil {
+		log.Printf("[Baron.HttpClient] Echo err=%v\n", err)
+		return
+	}
+	log.Printf("[Baron.HTTPClient] Echo result=%+v\n", *out)
+	pln()
+	// http client
+	var resp pb.EchoResponse
+	err = gout.GET("http://localhost:5050/echo").SetQuery(gout.H{"in":"http EchoRquest"}).BindJSON(&resp).Do()
+	if err != nil {
+		log.Printf("[HTTPClient] echo err=%v\n", err)
+		return
+	}
+	log.Printf("[HTTPClient] Echo result=%+v\n", resp)
+
+}
+func pln() {
+	log.Println("---------------------------------------------------------------------------------")
+}

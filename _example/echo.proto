@@ -30,10 +30,10 @@ service Echo {
       custom {
         kind: "HEAD"
         // Loudness is accepted in the http path
-        path: "/louder/{Loudness}"
+        path: "/louder/{loudness}"
       }
       additional_bindings {
-        post: "/louder/{Loudness}"
+        post: "/louder/{loudness}"
         // All other fields (In) are located in the body of the http/json request
         body: "*"
       }
@@ -44,22 +44,22 @@ service Echo {
   rpc LouderGet (LouderRequest) returns (EchoResponse) {
     option (google.api.http) = {
       // Loudness is accepted in the http path
-      get: "/louder/{Loudness}"
+      get: "/louder/{loudness}"
     };
   }
 }
 
 message EchoRequest {
-  string In = 1;
+  string in = 1;
 }
 
 message LouderRequest {
-  // In is the string to echo back
-  string In = 1;
-  // Loudness is the number of exclamations marks to add to the echoed string
-  int32 Loudness = 2;
+  // in is the string to echo back
+  string in = 1;
+  // loudness is the number of exclamations marks to add to the echoed string
+  int32 loudness = 2;
 }
 
 message EchoResponse {
-  string Out = 1;
+  string out = 1;
 }
