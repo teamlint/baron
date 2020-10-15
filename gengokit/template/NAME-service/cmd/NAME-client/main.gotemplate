@@ -7,8 +7,6 @@ import (
 
 	pb "{{.PBImportPath -}}"
 
-	"github.com/guonaihong/gout"
-
 	"google.golang.org/grpc"
 )
 
@@ -34,54 +32,50 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	pln()
-	// baron grpc client
-	baronGrpcClient, err := pb.NewGRPCClient(conn)
-	if err != nil {
-		log.Fatal(err)
+
+
+	{{with $te := . }}
+	{{range $i := $te.Service.Methods -}}
+	{
+	
+		log.Println("[{{$te.Service.Name}}.{{GoName $i.Name}}]")
+		pln()
+		ctx := context.Background()
+		// request
+		var in pb.{{GoName $i.RequestType.Name}}
+		// baron grpc client
+		baronGrpcClient, err := pb.NewGRPCClient(conn)
+		if err != nil {
+			log.Fatal(err)
+		}
+		out, err := baronGrpcClient.{{GoName $i.Name}}(ctx, &in)
+		if err != nil {
+			log.Fatalf("[Baron.GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
+		}
+		log.Printf("[Baron.GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
+		pln()
+		// grpc client
+		grpcClient := pb.New{{$te.Service.Name}}Client(conn)
+		out, err = grpcClient.{{GoName $i.Name}}(ctx, &in)
+		if err != nil {
+			log.Fatalf("[GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
+		}
+		log.Printf("[GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
+		pln()
+		// baron http client
+		baronHTTPClient, err := pb.NewHTTPClient(httpAddr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		out, err = baronHTTPClient.{{GoName $i.Name}}(ctx, &in)
+		if err != nil {
+			log.Fatalf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
+		}
+		log.Printf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
+		pln()
 	}
-	ctx := context.Background()
-	in := pb.EchoRequest{
-		In: "baron.grpc EchoRequest",
-	}
-	out, err := baronGrpcClient.Echo(ctx, &in)
-	if err != nil {
-		log.Printf("[Baron.GRPCClient] Echo err=%v\n", err)
-		return
-	}
-	log.Printf("[Baron.GRPCClient] Echo result=%+v\n", *out)
-	pln()
-	// grpc client
-	grpcClient := pb.NewEchoClient(conn)
-	in.In = "grpc EchoRequest"
-	out, err = grpcClient.Echo(ctx, &in)
-	if err != nil {
-		log.Printf("[GRPCClient] Echo err=%v\n", err)
-		return
-	}
-	log.Printf("[GRPCClient] Echo result=%+v\n", *out)
-	pln()
-	// baron http client
-	baronHttpClient, err := pb.NewHTTPClient(httpAddr)
-	if err != nil {
-		log.Fatal(err)
-	}
-	in.In = "baron.http EchoRequest"
-	out, err = baronHttpClient.Echo(ctx, &in)
-	if err != nil {
-		log.Printf("[Baron.HttpClient] Echo err=%v\n", err)
-		return
-	}
-	log.Printf("[Baron.HTTPClient] Echo result=%+v\n", *out)
-	pln()
-	// http client
-	var resp pb.EchoResponse
-	err = gout.GET("http://localhost:5050/echo").SetQuery(gout.H{"in":"http EchoRquest"}).BindJSON(&resp).Do()
-	if err != nil {
-		log.Printf("[HTTPClient] echo err=%v\n", err)
-		return
-	}
-	log.Printf("[HTTPClient] Echo result=%+v\n", resp)
+	{{end}}
+	{{end}}
 
 }
 func pln() {

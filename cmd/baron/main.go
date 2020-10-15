@@ -30,10 +30,13 @@ const (
 )
 
 var (
-	svcPackageFlag = flag.String("svcout", "", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
+	svcPackageFlag = flag.StringP("svcout", "o", "", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
 	verboseFlag    = flag.BoolP("verbose", "v", false, "Verbose output")
 	helpFlag       = flag.BoolP("help", "h", false, "Print usage")
-	getStartedFlag = flag.BoolP("start", "", false, "Output a 'start.proto' protobuf file in ./")
+	startFlag      = flag.BoolP("start", "s", false, "Output a 'start.proto' protobuf file in ./")
+	versionFlag    = flag.BoolP("version", "V", false, "Print version")
+	clientFlag     = flag.BoolP("client", "c", false, "Generate NAME-service client")
+	transportFlag  = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|http|nats]")
 )
 
 var binName = filepath.Base(os.Args[0])
@@ -45,6 +48,8 @@ var (
 	// BuildDate is compiled into baron with the flag
 	// go install -ldflags "-X main.date=$VERSION_DATE"
 	date string
+	// buildinfo
+	buildinfo string
 )
 
 func init() {
@@ -61,7 +66,6 @@ func init() {
 		os.Exit(0)
 	}
 
-	var buildinfo string
 	buildinfo = fmt.Sprintf("version: %s", version)
 	buildinfo = fmt.Sprintf("%s version date: %s", buildinfo, date)
 
@@ -70,7 +74,7 @@ func init() {
 			fmt.Fprintf(os.Stderr, "%s (%s)\n", binName, strings.TrimSpace(buildinfo))
 		}
 		fmt.Fprintf(os.Stderr, "\nUsage: %s [options] <protofile>...\n", binName)
-		fmt.Fprintf(os.Stderr, "\nGenerates go-kit services using proto3 and gRPC definitions.\n")
+		fmt.Fprintf(os.Stderr, "\nGenerates %s(go-kit) services using proto3 and gRPC definitions.\n", binName)
 		fmt.Fprintln(os.Stderr, "\nOptions:")
 		flag.PrintDefaults()
 	}
@@ -84,17 +88,26 @@ func main() {
 		os.Exit(0)
 	}
 
+	if *versionFlag {
+		fmt.Fprintf(os.Stderr, "%s (%s)\n", binName, strings.TrimSpace(buildinfo))
+		os.Exit(0)
+	}
+
 	log.SetLevel(log.InfoLevel)
 	if *verboseFlag {
 		log.SetLevel(log.DebugLevel)
 	}
 
-	if *getStartedFlag {
+	if *startFlag {
 		pkg := ""
+		outDir := ""
 		if len(flag.Args()) > 0 {
 			pkg = flag.Args()[0]
+			if len(flag.Args()) > 1 {
+				outDir = flag.Args()[1]
+			}
 		}
-		os.Exit(start.Do(pkg))
+		os.Exit(start.Do(pkg, outDir))
 	}
 
 	if len(flag.Args()) == 0 {
@@ -142,7 +155,10 @@ func main() {
 // parseInput constructs a *config.Config with all values needed to parse
 // service definition files.
 func parseInput() (*config.Config, error) {
-	var cfg config.Config
+	cfg := config.Config{
+		GenClient: *clientFlag,
+		Transport: *transportFlag,
+	}
 
 	// GOPATH
 	cfg.GoPath = filepath.SplitList(os.Getenv("GOPATH"))
@@ -296,6 +312,8 @@ func generateCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Reader, 
 		PBPackage:     cfg.PBPackage,
 		GoPackage:     cfg.ServicePackage,
 		PreviousFiles: cfg.PrevGen,
+		GenClient:     cfg.GenClient,
+		Transport:     cfg.Transport,
 		Version:       version,
 		VersionDate:   date,
 	}
@@ -315,6 +333,8 @@ func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 		PBPackage:     cfg.PBPackage,
 		GoPackage:     cfg.ServicePackage,
 		PreviousFiles: cfg.PrevGen,
+		GenClient:     cfg.GenClient,
+		Transport:     cfg.Transport,
 		Version:       version,
 		VersionDate:   date,
 	}

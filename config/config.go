@@ -18,4 +18,8 @@ type Config struct {
 	DefPaths []string
 	// The files of a previously generated service, may be nil
 	PrevGen map[string]io.Reader
+	// Generate service client CLI
+	GenClient bool
+	// Service transport protocol: all|grpc|http|nats
+	Transport string
 }

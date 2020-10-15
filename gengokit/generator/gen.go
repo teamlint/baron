@@ -20,6 +20,10 @@ import (
 	"github.com/teamlint/baron/svcdef"
 )
 
+var (
+	ErrGenIgnored = errors.New("ignored files")
+)
+
 // GenerateGokit returns a gokit service generated from a service definition (svcdef),
 // the package to the root of the generated service goPackage, the package
 // to the .pb.go service struct files (goPBPackage) and any prevously generated files.
@@ -39,15 +43,16 @@ func GenerateGokit(sd *svcdef.Svcdef, conf gengokit.Config) (map[string]io.Reade
 		if templPath == service.BaronPath {
 			continue
 		}
-
 		// Re-derive the actual path for this file based on the service output
 		// path provided by the baron main.go
 		actualPath := templatePathToActual(templPath, svcname)
 		file, err := generateResponseFile(templPath, data, conf.PreviousFiles[actualPath])
 		if err != nil {
+			if err == ErrGenIgnored {
+				continue
+			}
 			return nil, errors.Wrap(err, "cannot render template")
 		}
-
 		codeGenFiles[actualPath] = file
 	}
 
@@ -108,6 +113,14 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 		m.Load(prevFile)
 		if genCode, err = m.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
+		}
+	case service.CmdClientPath:
+		if data.Config.GenClient {
+			if genCode, err = applyTemplateFromPath(templFP, data); err != nil {
+				return nil, errors.Wrapf(err, "cannot render cmd client template: %s", templFP)
+			}
+		} else {
+			return nil, ErrGenIgnored
 		}
 	default:
 		if genCode, err = applyTemplateFromPath(templFP, data); err != nil {

@@ -24,6 +24,10 @@ type Config struct {
 	VersionDate string
 
 	PreviousFiles map[string]io.Reader
+	// transport all|grpc|http|nats
+	Transport string
+	// generate client CLI
+	GenClient bool
 }
 
 // FuncMap contains a series of utility functions to be passed into
@@ -50,6 +54,8 @@ type Data struct {
 	// A helper struct for generating http transport functionality.
 	HTTPHelper *httptransport.Helper
 	FuncMap    template.FuncMap
+	// generate config
+	Config Config
 
 	Version     string
 	VersionDate string
@@ -66,6 +72,7 @@ func NewData(sd *svcdef.Svcdef, conf Config) (*Data, error) {
 		FuncMap:      FuncMap,
 		Version:      conf.Version,
 		VersionDate:  conf.VersionDate,
+		Config:       conf,
 	}, nil
 }
 

@@ -3,6 +3,7 @@ package start
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -13,10 +14,12 @@ import (
 
 type protoInfo struct {
 	alias string
+	out   string
 }
 
 func (p protoInfo) FileName() string {
-	return p.PackageName() + ".proto"
+	// return p.PackageName() + ".proto"
+	return filepath.Join(p.out, p.PackageName()+".proto")
 }
 
 func (p protoInfo) PackageName() string {
@@ -40,7 +43,7 @@ func (p protoInfo) ServiceName() string {
 // If the file exists, Do prints a warning and returns a non-zero exit code.
 // The non-zero exit code is to enable using the return from this function in
 // os.Exit().
-func Do(pkg string) int {
+func Do(pkg string, outDir string) int {
 	const fallbackFName = "start"
 	if pkg == "" {
 		pkg = fallbackFName
@@ -48,6 +51,7 @@ func Do(pkg string) int {
 	pkg = removeDotProtoSuffix(pkg)
 	pinfo := protoInfo{
 		alias: pkg,
+		out:   outDir,
 	}
 	if _, err := os.Stat(pinfo.FileName()); err == nil {
 		existingFile, err := renderTemplate("existingFileMsg", existingFileMsg, pinfo)
@@ -58,13 +62,21 @@ func Do(pkg string) int {
 		log.Error(string(existingFile))
 		return 1
 	}
+	// create directory
+	if outDir != "" {
+		err := os.MkdirAll(filepath.Dir(pinfo.FileName()), 0777)
+		if err != nil {
+			log.Error(err)
+			return 1
+		}
+	}
 	f, err := os.Create(pinfo.FileName())
 	if err != nil {
 		log.Error(errors.Wrapf(err, "cannot create %q", pinfo.FileName()))
 		return 1
 	}
 
-	code, err := renderTemplate(pinfo.FileName(), starterProto, pinfo)
+	code, err := renderTemplate(pinfo.FileName(), startProto, pinfo)
 	if err != nil {
 		log.Error(err)
 		return 1

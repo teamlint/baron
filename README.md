@@ -57,13 +57,7 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
-- 命令行参数 
-  * baron start [proto]
-  * baron [option] api.proto ,option 增加transport, 默认all(http|grpc|nrpc等), 生成代码根据传输协议生成不同代码
+- NATS 传输协议支持
   
-- 应用结构调整
-
-  每个微服务独立go.mod
-
 - 
 

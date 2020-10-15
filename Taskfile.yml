@@ -64,16 +64,23 @@ tasks:
     silent: true
 
 
-  example:
-    desc: 'example'
+  gen-example:
+    desc: 'baron gen example service'
     dir: './_example'
     cmds: 
-      - baron echo.proto
-    silent: true
+      - baron -v --client --svcout=./ ./api/echo/echo.proto
+    silent: false
 
   run-example:
     desc: 'run example'
     dir: ./_example/echo-service/cmd/echo
+    cmds:
+      - go run main.go 
+    silent: false
+
+  run-example-client:
+    desc: 'run example'
+    dir: ./_example/echo-service/cmd/echo-client
     cmds:
       - go run main.go 
     silent: false
@@ -83,4 +90,32 @@ tasks:
     dir: ./_example/echo-service/cmd/echo
     cmds:
       - go build main.go 
+    silent: false
+
+  start:
+    desc: 'baron -v --start {pkgname} {outdir}'
+    dir: ./_example/
+    cmds: 
+      - baron -v --start start ./api/start
+    silent: false
+
+  gen-start:
+    desc: 'baron gen start service'
+    dir: ./_example/
+    cmds: 
+      - baron -v --svcout=./ ./api/start/start.proto
+    silent: false
+
+  run-start:
+    desc: 'run start'
+    dir: ./_example/start-service/cmd/start
+    cmds:
+      - go run main.go 
+    silent: false
+
+  run-start-client:
+    desc: 'run start.client'
+    dir: ./_example/start-service/cmd/start-client
+    cmds:
+      - go run main.go 
     silent: false

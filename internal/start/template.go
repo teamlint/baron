@@ -1,6 +1,6 @@
 package start
 
-const starterProto = `
+const startProto = `
 syntax = "proto3";
 
 package {{.PackageName}};
@@ -29,7 +29,7 @@ message StatusResponse {
 }
 `
 
-const nextStepMsg = `A "starter" protobuf file named '{{.FileName}}' has been created in the
+const nextStepMsg = `A "start" protobuf file named '{{.FileName}}' has been created in the
 current directory. You can generate a service based on this new protobuf file
 at any time using the following command:
 
@@ -41,7 +41,7 @@ example, to generate a 'foo.proto', use the following command:
 
     baron --start foo
 `
-const existingFileMsg = `There's already a "starter" protobuf file named '{{.FileName}}' in the current
+const existingFileMsg = `There's already a "start" protobuf file named '{{.FileName}}' in the current
 directory. If you'd like to generate a service based on this existing protobuf
 file, you should instead run the command:
 
