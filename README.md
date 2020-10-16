@@ -39,7 +39,7 @@ add [http annotations](
 https://github.com/googleapis/googleapis/blob/928a151b2f871b4239b7707e1bb59258df3fe10a/google/api/http.proto#L36)
 for HTTP 1.1/JSON transport!
 
-Then you open the `handlers/handlers.go`,
+Then you open the `service/service.go`,
 add you business logic, and you're good to go.
 
 Here is an example service definition: [Echo Service](./_example/echo.proto)
@@ -60,4 +60,8 @@ See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 - NATS 传输协议支持
   
 - 
+
+## 参考
+- https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码
+- https://github.com/OahcUil94/go-kit-training go-kit微服务套件使用
 

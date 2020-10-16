@@ -30,7 +30,7 @@ const ServicePath = "service/service.gotemplate"
 // New should be passed the previous version of the service to parse.
 func NewService(svc *svcdef.Service, prev io.Reader) (gengokit.Renderable, error) {
 	var h handler
-	log.WithField("Service Methods", len(svc.Methods)).Debug("Handler being created")
+	log.WithField("Service Methods", len(svc.Methods)).Debug("Service being created")
 	h.mMap = newMethodMap(svc.Methods)
 	h.service = svc
 
