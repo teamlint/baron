@@ -88,6 +88,46 @@ Additional internal packages of note used by these programs are:
 └── util 工具包
 ```
 
+## 帮助方法
+
+### 中间件处理
+
+来源: https://github.com/phungvandat/clean-architecture
+
+```go
+package service
+
+import (
+	"reflect"
+)
+
+// Compose applies middlewares to Service.
+// loop middlewares in reverse order to make them run in the order in which
+// they are specified. ie.
+// `Compose(s, logging, validation)` would first applies `logging` then `validation`.
+func Compose(svc interface{}, mws ...interface{}) interface{} {
+	for i := len(mws) - 1; i >= 0; i-- {
+		vv := reflect.ValueOf(mws[i]).Call([]reflect.Value{reflect.ValueOf(svc)})
+		svc = vv[0].Interface()
+	}
+	return s
+}
+
+```
+
+调用
+
+```go
+// user service
+userService = service.Compose(
+  userSvc.NewUserService(repo, txer),
+  userSvc.ValidationMiddleware(),
+).(userSvc.Service)
+
+```
+
+
+
 ## gRPC 服务端选项
 
 `ServerOption`为Serve设置可选的函数调用, 有以下几种: 

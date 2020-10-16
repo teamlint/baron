@@ -64,4 +64,5 @@ See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 ## 参考
 - https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码
 - https://github.com/OahcUil94/go-kit-training go-kit微服务套件使用
+- https://github.com/phungvandat/clean-architecture Example about clean architecture in golang
 

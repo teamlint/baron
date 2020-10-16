@@ -3,6 +3,10 @@
 // NAME-service/baron/NAME.pb.baron.gotemplate (21.579kB)
 // NAME-service/cmd/NAME/main.gotemplate (1.06kB)
 // NAME-service/cmd/NAME-client/main.gotemplate (1.961kB)
+// NAME-service/config/config.gotemplate (161B)
+// NAME-service/global/global.gotemplate (161B)
+// NAME-service/model/model.gotemplate (160B)
+// NAME-service/repository/repository.gotemplate (165B)
 // NAME-service/server/server.gotemplate (2.399kB)
 // NAME-service/service/hooks.gotemplate (62B)
 // NAME-service/service/middlewares.gotemplate (71B)
@@ -132,6 +136,86 @@ func cmdNameClientMainGotemplate() (*asset, error) {
 
 	info := bindataFileInfo{name: "cmd/NAME-client/main.gotemplate", size: 1961, mode: os.FileMode(0644), modTime: time.Unix(1464111000, 0)}
 	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0xaf, 0x7b, 0x8d, 0xe, 0xdd, 0xd0, 0xc1, 0xd3, 0x20, 0xed, 0xa4, 0x9c, 0x43, 0x65, 0xd5, 0x93, 0x9, 0x9, 0xf, 0x68, 0x20, 0x10, 0x43, 0xb5, 0x1b, 0xae, 0xed, 0x66, 0x7d, 0xe4, 0xdd, 0x57}}
+	return a, nil
+}
+
+var _configConfigGotemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4c\xca\xbd\x0e\x82\x30\x14\xc5\xf1\xbd\x4f\x71\x9e\x80\xee\xae\xe2\xe0\x22\x89\x21\xee\x05\x0e\xf5\x46\x72\x6b\x2e\x55\x62\x48\xdf\xdd\xf8\x31\xb0\x9d\x93\xff\xcf\x7b\xec\xd3\x40\x44\x2a\x2d\x64\x0e\xe8\x5e\xe8\x82\x25\xad\x50\x37\x38\x35\x2d\x0e\xf5\xb1\xad\x9c\xf7\x38\xd3\x1e\xaa\xa2\xf1\x07\xb0\xc8\x34\x21\x3d\x69\x8b\x49\x26\xf2\x55\x66\x8c\x32\xf1\x8b\x2f\xb4\x59\x92\xee\xb0\xae\xd5\x7f\x97\xb2\x09\xa8\x43\xe6\xb6\x7e\x7e\x29\xce\xdd\x43\x7f\x0b\x91\xe8\x93\x8e\x12\xdd\x3b\x00\x00\xff\xff\x39\x31\x87\xba\xa1\x00\x00\x00")
+
+func configConfigGotemplateBytes() ([]byte, error) {
+	return bindataRead(
+		_configConfigGotemplate,
+		"config/config.gotemplate",
+	)
+}
+
+func configConfigGotemplate() (*asset, error) {
+	bytes, err := configConfigGotemplateBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "config/config.gotemplate", size: 161, mode: os.FileMode(0644), modTime: time.Unix(1464111000, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x41, 0x2e, 0xfa, 0x4f, 0xc9, 0x82, 0x82, 0x79, 0x75, 0x77, 0x1f, 0x87, 0x75, 0x77, 0xdd, 0xbf, 0xbd, 0x8d, 0x55, 0x27, 0x34, 0x5c, 0xa6, 0x1f, 0x1a, 0xa3, 0x7e, 0x3a, 0x93, 0xc1, 0x88, 0xb}}
+	return a, nil
+}
+
+var _globalGlobalGotemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4c\xca\x3b\x0e\xc2\x30\x10\x84\xe1\xde\xa7\x98\x13\xc4\x3d\x2d\xa6\xa0\x21\x12\x8a\xe8\xd7\x64\x31\x2b\xac\x35\xda\x18\x22\x14\xf9\xee\x88\x47\x91\x6e\x46\xff\xe7\x3d\xb6\x65\x64\x24\x56\x36\xaa\x3c\x22\xbe\x10\xc9\x8a\x76\x08\x3d\x0e\xfd\x80\x5d\xd8\x0f\x9d\xf3\x1e\x47\xb6\x87\xaa\x68\xfa\x01\xcc\x92\x33\xca\x93\x6d\x36\xa9\x8c\x7a\x95\x09\x17\xc9\xfc\xc5\x27\xb6\x49\x8a\x6e\xb0\x2c\xdd\x7f\xb7\xb6\x0a\x08\x54\x79\x5d\x3f\xbf\x35\xe7\xee\x74\xbe\x51\x62\xa4\x5c\x22\x65\xf7\x0e\x00\x00\xff\xff\x10\x51\xb9\x97\xa1\x00\x00\x00")
+
+func globalGlobalGotemplateBytes() ([]byte, error) {
+	return bindataRead(
+		_globalGlobalGotemplate,
+		"global/global.gotemplate",
+	)
+}
+
+func globalGlobalGotemplate() (*asset, error) {
+	bytes, err := globalGlobalGotemplateBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "global/global.gotemplate", size: 161, mode: os.FileMode(0644), modTime: time.Unix(1464111000, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x40, 0x51, 0x8b, 0xb4, 0x62, 0x28, 0x32, 0xe8, 0xe, 0xec, 0xa, 0xa4, 0x15, 0x63, 0x53, 0xde, 0xb3, 0x35, 0x9b, 0xea, 0xb1, 0x3a, 0x3, 0xa0, 0x76, 0x39, 0xe, 0xf6, 0xec, 0x31, 0x3e, 0x48}}
+	return a, nil
+}
+
+var _modelModelGotemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4c\xca\x3d\xae\xc2\x30\x10\xc4\xf1\xde\xa7\x98\x13\xc4\xfd\x6b\x5f\x28\x68\x88\x84\x22\x7a\x87\x0c\x66\x85\x59\xa3\x8d\x21\x42\x91\xef\x8e\xf8\x28\xd2\xcd\xe8\xff\xf3\x1e\xff\x79\x24\x22\x95\x16\x0a\x47\x0c\x4f\x0c\xc1\xb2\x36\x68\x3b\xec\xba\x1e\x9b\x76\xdb\x37\xce\x7b\xec\x69\x77\x55\xd1\xf8\x05\x98\x25\x25\xe4\x07\x6d\x36\x29\x44\x39\xcb\x84\x93\x24\x7e\xf0\x81\x36\x49\xd6\x3f\x2c\x4b\xf3\xdb\xb5\xae\x02\xda\x50\xb8\xae\xef\x5f\xab\x73\xb7\x70\xbc\x84\x48\x5c\xf3\xc8\xe4\x5e\x01\x00\x00\xff\xff\x35\x9a\xe8\x41\xa0\x00\x00\x00")
+
+func modelModelGotemplateBytes() ([]byte, error) {
+	return bindataRead(
+		_modelModelGotemplate,
+		"model/model.gotemplate",
+	)
+}
+
+func modelModelGotemplate() (*asset, error) {
+	bytes, err := modelModelGotemplateBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "model/model.gotemplate", size: 160, mode: os.FileMode(0644), modTime: time.Unix(1464111000, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x6a, 0x10, 0x0, 0x2f, 0xdf, 0x5, 0x64, 0xa1, 0xe, 0x90, 0x4f, 0x8b, 0xa2, 0xf0, 0xea, 0x20, 0xce, 0x6e, 0x79, 0x27, 0x2, 0x5c, 0x28, 0xea, 0x8e, 0x46, 0x28, 0xcc, 0x7a, 0xbd, 0x75, 0xe2}}
+	return a, nil
+}
+
+var _repositoryRepositoryGotemplate = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x4c\xca\xbd\x0e\x82\x30\x14\xc5\xf1\xbd\x4f\x71\x9e\x80\xee\xae\xe2\xe0\x22\x89\x21\xee\x45\x8e\x78\x23\xe9\x25\xb7\x55\x42\x48\xdf\xdd\xf8\x31\xb0\x9d\x93\xff\xcf\x7b\xec\xb5\x27\x06\x46\x5a\xc8\xec\xd1\x2d\xe8\x82\x69\xac\x50\x37\x38\x35\x2d\x0e\xf5\xb1\xad\x9c\xf7\x38\xd3\x9e\x31\x4a\x1c\x7e\x00\xb3\x8c\x23\xf4\x45\x9b\x4d\x32\x91\xef\x92\x70\x93\x91\x5f\x7c\xa1\x25\xd1\xb8\xc3\xba\x56\xff\x5d\xca\x26\xa0\x0e\x99\xdb\xfa\xf9\xa5\x38\x37\x85\xeb\x23\x0c\x84\x71\xd2\x24\x59\x6d\x71\xef\x00\x00\x00\xff\xff\x10\x36\xf1\x40\xa5\x00\x00\x00")
+
+func repositoryRepositoryGotemplateBytes() ([]byte, error) {
+	return bindataRead(
+		_repositoryRepositoryGotemplate,
+		"repository/repository.gotemplate",
+	)
+}
+
+func repositoryRepositoryGotemplate() (*asset, error) {
+	bytes, err := repositoryRepositoryGotemplateBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "repository/repository.gotemplate", size: 165, mode: os.FileMode(0644), modTime: time.Unix(1464111000, 0)}
+	a := &asset{bytes: bytes, info: info, digest: [32]uint8{0x2c, 0xe4, 0xd, 0xdc, 0xdb, 0xa9, 0xdb, 0xba, 0x9, 0x39, 0x1b, 0xba, 0xbc, 0xbc, 0xd1, 0xb, 0xbd, 0x45, 0xfe, 0x57, 0x51, 0x6d, 0x0, 0x40, 0xb6, 0x8, 0x37, 0x13, 0x99, 0x68, 0xf2, 0xfe}}
 	return a, nil
 }
 
@@ -306,13 +390,17 @@ func AssetNames() []string {
 
 // _bindata is a table, holding each asset generator, mapped to its name.
 var _bindata = map[string]func() (*asset, error){
-	"baron/NAME.pb.baron.gotemplate":  baronNamePbBaronGotemplate,
-	"cmd/NAME/main.gotemplate":        cmdNameMainGotemplate,
-	"cmd/NAME-client/main.gotemplate": cmdNameClientMainGotemplate,
-	"server/server.gotemplate":        serverServerGotemplate,
-	"service/hooks.gotemplate":        serviceHooksGotemplate,
-	"service/middlewares.gotemplate":  serviceMiddlewaresGotemplate,
-	"service/service.gotemplate":      serviceServiceGotemplate,
+	"baron/NAME.pb.baron.gotemplate":   baronNamePbBaronGotemplate,
+	"cmd/NAME/main.gotemplate":         cmdNameMainGotemplate,
+	"cmd/NAME-client/main.gotemplate":  cmdNameClientMainGotemplate,
+	"config/config.gotemplate":         configConfigGotemplate,
+	"global/global.gotemplate":         globalGlobalGotemplate,
+	"model/model.gotemplate":           modelModelGotemplate,
+	"repository/repository.gotemplate": repositoryRepositoryGotemplate,
+	"server/server.gotemplate":         serverServerGotemplate,
+	"service/hooks.gotemplate":         serviceHooksGotemplate,
+	"service/middlewares.gotemplate":   serviceMiddlewaresGotemplate,
+	"service/service.gotemplate":       serviceServiceGotemplate,
 }
 
 // AssetDebug is true if the assets were built with the debug flag enabled.
@@ -369,6 +457,18 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"NAME-client": &bintree{nil, map[string]*bintree{
 			"main.gotemplate": &bintree{cmdNameClientMainGotemplate, map[string]*bintree{}},
 		}},
+	}},
+	"config": &bintree{nil, map[string]*bintree{
+		"config.gotemplate": &bintree{configConfigGotemplate, map[string]*bintree{}},
+	}},
+	"global": &bintree{nil, map[string]*bintree{
+		"global.gotemplate": &bintree{globalGlobalGotemplate, map[string]*bintree{}},
+	}},
+	"model": &bintree{nil, map[string]*bintree{
+		"model.gotemplate": &bintree{modelModelGotemplate, map[string]*bintree{}},
+	}},
+	"repository": &bintree{nil, map[string]*bintree{
+		"repository.gotemplate": &bintree{repositoryRepositoryGotemplate, map[string]*bintree{}},
 	}},
 	"server": &bintree{nil, map[string]*bintree{
 		"server.gotemplate": &bintree{serverServerGotemplate, map[string]*bintree{}},
