@@ -4,3 +4,15 @@
 // Version Date: {{.VersionDate}}
 
 package global
+
+import (
+	"github.com/goava/di"
+)
+
+var (
+	Container *di.Container
+)
+
+func init() {
+	Container = di.New()
+}

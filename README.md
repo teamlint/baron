@@ -1,15 +1,9 @@
 # Baron
 micro service development framework
 
-Baron handles the painful parts of services, freeing you to focus on the
-business logic.
+Baron 根据 proto 文件快速生成 *.pb.go *.pb.baron.go(包含go-kit服务Endpoints,Transports)及微服务框架代码布局, 让你专注于业务逻辑处理.
 
 ## 安装
-
-Currently, there is no binary distribution of baron, you must install from
-source.
-
-To install this software, you must:
 
 1. Install protoc 3 or newer. The easiest way is to
 download a release from [github](https://github.com/google/protobuf/releases)
