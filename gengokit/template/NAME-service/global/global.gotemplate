@@ -14,5 +14,5 @@ var (
 )
 
 func init() {
-	Container = di.New()
+	Container, _ = di.New()
 }

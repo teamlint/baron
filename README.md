@@ -52,7 +52,7 @@ See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
 - NATS 传输协议支持
-  
+  根据参数生成不同传输协议代码  
 - 
 
 ## 参考

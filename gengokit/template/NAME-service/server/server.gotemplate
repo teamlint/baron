@@ -12,6 +12,7 @@ import (
 	"net/http/pprof"
 
 	// 3d Party
+	"github.com/nats-io/nats.go"
 	"google.golang.org/grpc"
 
 	// This Service
@@ -25,6 +26,8 @@ type Config struct {
 	HTTPAddr string
 	DebugAddr string
 	GRPCAddr string
+	NATSAddr string
+	Debug bool
 }
 
 func NewEndpoints(svc pb.{{.Service.Name}}Server) pb.Endpoints {
@@ -64,18 +67,20 @@ func Run(cfg Config) {
 	go service.InterruptHandler(errc)
 
 	// Debug listener.
-	go func() {
-		log.Println("transport", "debug", "addr", cfg.DebugAddr)
+	if cfg.Debug {
+		go func() {
+			log.Println("transport", "debug", "addr", cfg.DebugAddr)
 
-		m := http.NewServeMux()
-		m.Handle("/debug/pprof/", http.HandlerFunc(pprof.Index))
-		m.Handle("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
-		m.Handle("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
-		m.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
-		m.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
+			m := http.NewServeMux()
+			m.Handle("/debug/pprof/", http.HandlerFunc(pprof.Index))
+			m.Handle("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+			m.Handle("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+			m.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+			m.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
 
-		errc <- http.ListenAndServe(cfg.DebugAddr, m)
-	}()
+			errc <- http.ListenAndServe(cfg.DebugAddr, m)
+		}()
+	}
 
 	// HTTP transport.
 	go func() {
@@ -98,6 +103,24 @@ func Run(cfg Config) {
 		pb.Register{{.Service.Name}}Server(s, srv)
 
 		errc <- s.Serve(ln)
+	}()
+
+	// NATS transport.
+	go func() {
+		log.Println("transport", "NATS","addr", cfg.NATSAddr)
+		conn, err := nats.Connect(cfg.NATSAddr)
+		if err != nil {
+			errc <- err
+			return
+		}
+		// defer conn.Close()
+
+		srv := pb.MakeNATSServer(endpoints)
+		err = pb.ServeNATS(conn, srv)
+		if err != nil {
+			errc <- err
+			return
+		}
 	}()
 
 	// Run!

@@ -28,12 +28,14 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	"github.com/nats-io/nats.go"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 
 	grpctransport "github.com/go-kit/kit/transport/grpc"
 	httptransport "github.com/go-kit/kit/transport/http"
+	natstransport "github.com/go-kit/kit/transport/nats"
 )
 
 
@@ -159,8 +161,8 @@ func MakeGRPCServer(endpoints Endpoints, options ...grpctransport.ServerOption) 
 		grpctransport.ServerBefore(GRPCMetadataToContext),
 	}
 	serverOptions = append(serverOptions, options...)
-	return &grpcServer{
 	// {{ ToLower .Service.Name }}
+	return &grpcServer{
 	{{range $i := .Service.Methods}}
 		{{ToLower $i.Name}}: grpctransport.NewServer(
 			endpoints.{{$i.Name}}Endpoint,
@@ -669,4 +671,120 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 	{{- end -}}
 {{end}}
 
+/************************************** NATSServer ******************************************/
+
+// ServeNATS 
+func ServeNATS(conn *nats.Conn, srv *natsServer) error {
+{{with $te := .}}
+	{{- range $i := $te.Service.Methods}}
+		{{ToLower $i.Name}}Sub, err := conn.QueueSubscribe("{{$te.Service.Name}}.{{$i.Name}}", "{{$te.Service.Name}}", srv.{{$i.Name}}.ServeMsg(conn))
+		if err != nil {
+			return err
+		}
+		_ = {{ToLower $i.Name}}Sub
+	{{end}}
+	return nil
+{{end}}
+}
+
+// MakeNATSServer makes a set of endpoints available as a NATS {{.Service.Name}}Server.
+func MakeNATSServer(endpoints Endpoints, options ...natstransport.SubscriberOption) *natsServer {
+	serverOptions := []natstransport.SubscriberOption{
+		// grpctransport.ServerBefore(GRPCMetadataToContext),
+	}
+	serverOptions = append(serverOptions, options...)
+	// {{ ToLower .Service.Name }}
+	return &natsServer{
+	{{range $i := .Service.Methods}}
+		{{$i.Name}}: natstransport.NewSubscriber(
+			endpoints.{{$i.Name}}Endpoint,
+			DecodeNATS{{$i.Name}}Request,
+			// EncodeNATS{{$i.Name}}Response,
+			EncodeNATSGenericResponse,
+			serverOptions...,
+		),
+	{{- end}}
+	}
+}
+
+// natsServer implements the {{GoName .Service.Name}}Server interface
+type natsServer struct {
+{{range $i := .Service.Methods}}
+	{{$i.Name}}   *natstransport.Subscriber
+{{- end}}
+}
+
+// Server Decode
+{{range $i := .Service.Methods}}
+func DecodeNATS{{.Name}}Request(ctx context.Context, msg *nats.Msg) (interface{}, error) {
+	var req {{GoName $i.RequestType.Name}}
+	if err := json.Unmarshal(msg.Data, &req); err != nil {
+		return nil, err
+	}
+	return &req, nil
+}
+{{end}}
+
+// Server Encode
+
+// EncodeNATSGenericResponse is a transport/nats.EncodeResponseFunc that encodes
+// JSON object to the subscriber reply. Many JSON-over services can use it as
+// a sensible default.
+func EncodeNATSGenericResponse(ctx context.Context, reply string, nc *nats.Conn, response interface{}) error {
+	return natstransport.EncodeJSONResponse(ctx, reply, nc, response)
+}
+
+/************************************** NATSClient ******************************************/
+
+// NewNATSClient returns an service backed by a nats client connection. It is the
+// responsibility of the caller to dial, and later close, the connection.
+func NewNATSClient(conn *nats.Conn, options ...natstransport.PublisherOption) ({{.Service.Name}}Server, error) {
+	{{- with $te := .}}
+		{{- range $i := $te.Service.Methods}}
+			var {{ToLower $i.Name}}Endpoint endpoint.Endpoint
+			{
+				{{ToLower $i.Name}}Endpoint = natstransport.NewPublisher(
+					conn,
+					"{{$te.Service.Name}}.{{$i.Name}}",
+					EncodeNATSGenericRequest,
+					DecodeNATS{{$i.Name}}Response,
+					options...,
+				).Endpoint()
+			}
+		{{end}}
+	{{end}}
+
+	return Endpoints{
+	{{range $i := .Service.Methods -}}
+		{{$i.Name}}Endpoint:    {{ToLower $i.Name}}Endpoint,
+	{{end}}
+	}, nil
+}
+
+// NATS Client Decode
+{{range $i := .Service.Methods}}
+// DecodeNATS{{$i.Name}}Response is a transport/nats.DecodeResponseFunc that converts a
+// nats.Msg to a user-domain {{ToLower $i.Name}} response. Primarily useful in a client.
+func DecodeNATS{{$i.Name}}Response(ctx context.Context, msg *nats.Msg ) (interface{}, error) {
+	// if err := json.Unmarshal(msg.Data, &errResponse); err != nil {
+	// 	return nil, err
+	// }
+	// if errResponse.Error != nil && errResponse.Error.Code == "_internal_" {
+	// 	return nil, errors.New(errResponse.Error.Message)
+	// }
+	var resp {{GoName $i.ResponseType.Name}}
+	if err := json.Unmarshal(msg.Data, &resp); err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
+{{end}}
+
+// NATS Client Encode
+// EncodeNATSGenericRequest is a transport/nats.EncodeRequestFunc that serializes the request as a
+// JSON object to the Data of the Msg. Many JSON-over-NATS services can use it as
+// a sensible default.
+func EncodeNATSGenericRequest(ctx context.Context, msg *nats.Msg, request interface{}) error {
+	return natstransport.EncodeJSONRequest(ctx, msg, request)
+}
 

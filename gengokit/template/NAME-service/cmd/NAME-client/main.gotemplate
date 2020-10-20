@@ -5,6 +5,9 @@ import (
 	"flag"
 	"log"
 
+
+	"github.com/nats-io/nats.go"
+
 	pb "{{.PBImportPath -}}"
 
 	"google.golang.org/grpc"
@@ -13,11 +16,13 @@ import (
 var (
 	grpcAddr string
 	httpAddr string
+	natsAddr string
 )
 
 func init() {
 	flag.StringVar(&grpcAddr, "grpc.addr", ":5040", "gRPC (HTTP) listen address")
 	flag.StringVar(&httpAddr, "http.addr", ":5050", "HTTP listen address")
+	flag.StringVar(&natsAddr, "nats.addr", "nats://127.0.0.1:4222", "NATS listen address")
 }
 
 func main() {
@@ -44,11 +49,11 @@ func main() {
 		// request
 		var in pb.{{GoName $i.RequestType.Name}}
 		// baron grpc client
-		baronGrpcClient, err := pb.NewGRPCClient(conn)
+		baronGRPCClient, err := pb.NewGRPCClient(conn)
 		if err != nil {
 			log.Fatal(err)
 		}
-		out, err := baronGrpcClient.{{GoName $i.Name}}(ctx, &in)
+		out, err := baronGRPCClient.{{GoName $i.Name}}(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
 		}
@@ -72,6 +77,22 @@ func main() {
 			log.Fatalf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
 		}
 		log.Printf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
+		pln()
+		// baron nats client
+		nc, err := nats.Connect(natsAddr)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer nc.Close()
+		baronNATSClient, err := pb.NewNATSClient(nc)
+		if err != nil {
+			log.Fatal(err)
+		}
+		out, err = baronNATSClient.{{GoName $i.Name}}(ctx, &in)
+		if err != nil {
+			log.Fatalf("[Baron.NATSClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
+		}
+		log.Printf("[Baron.NATSClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
 		pln()
 	}
 	{{end}}

@@ -9,6 +9,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	// This Service Server
 	"{{.ImportPath -}} /server"
@@ -20,8 +21,13 @@ func init() {
 	flag.StringVar(&config.DebugAddr, "debug.addr", ":5060", "Debug and metrics listen address")
 	flag.StringVar(&config.HTTPAddr, "http.addr", ":5050", "HTTP listen address")
 	flag.StringVar(&config.GRPCAddr, "grpc.addr", ":5040", "gRPC (HTTP) listen address")
+	flag.StringVar(&config.NATSAddr, "nats.addr", "nats://127.0.0.1:4222", "NATS listen address")
+	flag.BoolVar(&config.Debug, "debug", false, "Debug mode")
 
 	// Use environment variables, if set. Flags have priority over Env vars.
+	if debug := os.Getenv("DEBUG"); debug != "" {
+		config.Debug = "true" == strings.ToLower(debug)
+	}
 	if addr := os.Getenv("DEBUG_ADDR"); addr != "" {
 		config.DebugAddr = addr
 	}
@@ -33,6 +39,9 @@ func init() {
 	}
 	if addr := os.Getenv("GRPC_ADDR"); addr != "" {
 		config.GRPCAddr = addr
+	}
+	if addr := os.Getenv("NATS_ADDR"); addr != "" {
+		config.NATSAddr = addr
 	}
 }
 
