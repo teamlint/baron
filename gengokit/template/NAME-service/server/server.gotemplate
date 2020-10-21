@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"runtime"
 
 	// 3d Party
 	"github.com/nats-io/nats.go"
@@ -113,7 +114,10 @@ func Run(cfg Config) {
 			errc <- err
 			return
 		}
-		// defer conn.Close()
+		closeConn := func(c *nats.Conn) {
+			c.Close()
+		}
+		runtime.SetFinalizer(conn, closeConn)
 
 		srv := pb.MakeNATSServer(endpoints)
 		err = pb.ServeNATS(conn, srv)
