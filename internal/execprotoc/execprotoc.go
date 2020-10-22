@@ -102,7 +102,7 @@ func getProtocOutput(protoPaths, gopath []string) ([]byte, error) {
 // protoc executes protoc on protoPaths
 func protoc(protoPaths, gopath []string, plugin string) error {
 	var cmdArgs []string
-
+	cmdArgs = append(cmdArgs, "--experimental_allow_proto3_optional")
 	cmdArgs = append(cmdArgs, "--proto_path="+filepath.Dir(protoPaths[0]))
 
 	for _, gp := range gopath {

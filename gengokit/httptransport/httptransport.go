@@ -99,9 +99,10 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 			}
 			if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 				option.IsBaseType = true
-			} else {
-				option.GoType = "pb." + option.GoType
 			}
+			// else {
+			// 	option.GoType = "pb." + option.GoType
+			// }
 
 			// Modify GoType to reflect pointer or repeated status
 			if oneofType.Type.StarExpr && oneofType.Type.ArrayType {
@@ -112,7 +113,8 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 
 			option.IsEnum = oneofType.Type.Enum != nil
 			option.ConvertFunc, option.ConvertFuncNeedsErrorCheck = createDecodeConvertFunc(option)
-			option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			// option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			option.TypeConversion = fmt.Sprintf("&%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
 			option.ZeroValue = getZeroValue(option)
 
 			oneofField.Options = append(oneofField.Options, option)
@@ -140,9 +142,10 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 
 		if field.Type.Message == nil && field.Type.Enum == nil && field.Type.Map == nil {
 			newField.IsBaseType = true
-		} else {
-			newField.GoType = "pb." + newField.GoType
 		}
+		// else {
+		// 	newField.GoType = "pb." + newField.GoType
+		// }
 
 		// Modify GoType to reflect pointer or repeated status
 		if field.Type.StarExpr && field.Type.ArrayType {
