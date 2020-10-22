@@ -71,6 +71,20 @@ tasks:
       - baron -v --client --svcout=./ ./api/echo/echo.proto
     silent: false
 
+  gen-example-grpc:
+    desc: 'baron gen example.grpc service'
+    dir: './_example'
+    cmds: 
+      - baron -v --client --svcout=./ --transport=grpc ./api/echo/echo.proto
+    silent: false
+
+  gen-example-nats:
+    desc: 'baron gen example.nats service'
+    dir: './_example'
+    cmds: 
+      - baron -v --client --svcout=./ --transport=nats ./api/echo/echo.proto
+    silent: false
+
   run-example:
     desc: 'run example'
     dir: ./_example/echo-service/cmd/echo

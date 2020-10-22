@@ -24,7 +24,7 @@ type Config struct {
 	VersionDate string
 
 	PreviousFiles map[string]io.Reader
-	// transport all|grpc|http|nats
+	// transport all|grpc|nats
 	Transport string
 	// generate client CLI
 	GenClient bool

@@ -4,13 +4,14 @@ import (
 	"context"
 	"flag"
 	"log"
-
-
+	{{if eq .Config.Transport "all" "nats" }}
 	"github.com/nats-io/nats.go"
+	{{end}}
 
 	pb "{{.PBImportPath -}}"
-
+	{{if eq .Config.Transport "all" "grpc" }}
 	"google.golang.org/grpc"
+	{{end}}
 )
 
 var (
@@ -22,12 +23,16 @@ var (
 func init() {
 	flag.StringVar(&grpcAddr, "grpc.addr", ":5040", "gRPC (HTTP) listen address")
 	flag.StringVar(&httpAddr, "http.addr", ":5050", "HTTP listen address")
-	flag.StringVar(&natsAddr, "nats.addr", "nats://127.0.0.1:4222", "NATS listen address")
+	flag.StringVar(&natsAddr, "nats.addr", ":4222", "NATS listen address")
 }
 
 func main() {
 	flag.Parse()
-	// grpc connection
+	{{with $te := . }}
+	{{if eq $te.Config.Transport "all" "grpc" }}
+	// Baron GRPC Client
+	log.Println("[GRPC.{{$te.Service.Name}}]")
+	pln()
 	conn, err := grpc.Dial(
 		grpcAddr,
 		grpc.WithInsecure(),
@@ -37,58 +42,67 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-
-
-	{{with $te := . }}
-	{{range $i := $te.Service.Methods -}}
+	baronGRPCClient, err := pb.NewGRPCClient(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	{{range $i := $te.Service.Methods}}
+	// GRPC.{{$te.Service.Name}}.{{$i.Name}}
 	{
-	
-		log.Println("[{{$te.Service.Name}}.{{GoName $i.Name}}]")
-		pln()
 		ctx := context.Background()
-		// request
 		var in pb.{{GoName $i.RequestType.Name}}
-		// baron grpc client
-		baronGRPCClient, err := pb.NewGRPCClient(conn)
-		if err != nil {
-			log.Fatal(err)
-		}
 		out, err := baronGRPCClient.{{GoName $i.Name}}(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
 		}
 		log.Printf("[Baron.GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
 		pln()
-		// grpc client
-		grpcClient := pb.New{{$te.Service.Name}}Client(conn)
-		out, err = grpcClient.{{GoName $i.Name}}(ctx, &in)
-		if err != nil {
-			log.Fatalf("[GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
-		}
-		log.Printf("[GRPCClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
-		pln()
-		// baron http client
+	}
+	{{end}}
+	{{end}}
+
+	{{if $te.HTTPHelper.Methods}}
+	// Baron HTTP Client
+	log.Println("[HTTP][{{$te.Service.Name}}]")
+	pln()
+	{{range $method := $te.HTTPHelper.Methods}}
+	// HTTP.{{$te.Service.Name}}.{{$method.Name}}
+	{
+		ctx := context.Background()
+		var in pb.{{GoName $method.RequestType}}
 		baronHTTPClient, err := pb.NewHTTPClient(httpAddr)
 		if err != nil {
 			log.Fatal(err)
 		}
-		out, err = baronHTTPClient.{{GoName $i.Name}}(ctx, &in)
+		out, err := baronHTTPClient.{{GoName $method.Name}}(ctx, &in)
 		if err != nil {
-			log.Fatalf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
+			log.Fatalf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $method.Name}} err=%v\n", err)
 		}
-		log.Printf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $i.Name}} result=%+v\n", *out)
+		log.Printf("[Baron.HTTPClient] {{$te.Service.Name}}.{{GoName $method.Name}} result=%+v\n", *out)
 		pln()
-		// baron nats client
-		nc, err := nats.Connect(natsAddr)
-		if err != nil {
-			log.Fatal(err)
 		}
-		defer nc.Close()
-		baronNATSClient, err := pb.NewNATSClient(nc)
-		if err != nil {
-			log.Fatal(err)
-		}
-		out, err = baronNATSClient.{{GoName $i.Name}}(ctx, &in)
+	{{end}}
+	{{end}}
+
+	{{if eq $te.Config.Transport "all" "nats"}}
+	// Baron NATS Client
+	log.Println("[NATS.{{$te.Service.Name}}]")
+	pln()
+	nc, err := nats.Connect(natsAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer nc.Close()
+	baronNATSClient, err := pb.NewNATSClient(nc)
+	if err != nil {
+		log.Fatal(err)
+	}
+	{{range $i := $te.Service.Methods}}
+	// NATS.{{$te.Service.Name}}.{{$i.Name}}
+	{
+		ctx := context.Background()
+		var in pb.{{GoName $i.RequestType.Name}}
+		out, err := baronNATSClient.{{GoName $i.Name}}(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.NATSClient] {{$te.Service.Name}}.{{GoName $i.Name}} err=%v\n", err)
 		}
@@ -98,6 +112,7 @@ func main() {
 	{{end}}
 	{{end}}
 
+	{{end}}
 }
 func pln() {
 	log.Println("---------------------------------------------------------------------------------")

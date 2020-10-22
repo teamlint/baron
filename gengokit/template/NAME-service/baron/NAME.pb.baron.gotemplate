@@ -10,7 +10,6 @@ package {{.PackageName}}
 // decoders for those types, for all of our supported transport serialization
 // formats.
 
-
 import (
 	"bytes"
 	"context"
@@ -28,14 +27,20 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
+	{{if eq .Config.Transport "all" "nats" }}
 	"github.com/nats-io/nats.go"
-
+	{{end}}
+	{{if eq .Config.Transport "all" "grpc" }}
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-
+	{{end}}
+	{{if eq .Config.Transport "all" "grpc" }}
 	grpctransport "github.com/go-kit/kit/transport/grpc"
+	{{end}}
 	httptransport "github.com/go-kit/kit/transport/http"
+	{{if eq .Config.Transport "all" "nats" }}
 	natstransport "github.com/go-kit/kit/transport/nats"
+	{{end}}
 )
 
 
@@ -152,7 +157,7 @@ func (e *Endpoints) WrapAllLabeledExcept(middleware func(string, endpoint.Endpoi
 		{{- end}}
 	}
 }
-
+{{if eq .Config.Transport "all" "grpc" }}
 /************************************** GRPCServer ******************************************/
 
 // MakeGRPCServer makes a set of endpoints available as a gRPC {{.Service.Name}}Server.
@@ -296,7 +301,7 @@ func ContextValuesToGRPCMetadata(keys []string) grpctransport.ClientRequestFunc 
 		return ctx
 	}
 }
-
+{{end}}
 /************************************** HTTPServer ******************************************/
 
 const contentType = "application/json; charset=utf-8"
@@ -670,7 +675,7 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 	}
 	{{- end -}}
 {{end}}
-
+{{if eq .Config.Transport "all" "nats" }}
 /************************************** NATSServer ******************************************/
 
 // ServeNATS 
@@ -787,4 +792,4 @@ func DecodeNATS{{$i.Name}}Response(ctx context.Context, msg *nats.Msg ) (interfa
 func EncodeNATSGenericRequest(ctx context.Context, msg *nats.Msg, request interface{}) error {
 	return natstransport.EncodeJSONRequest(ctx, msg, request)
 }
-
+{{end}}

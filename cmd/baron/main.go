@@ -36,7 +36,7 @@ var (
 	startFlag      = flag.BoolP("start", "s", false, "Output a 'start.proto' protobuf file in ./")
 	versionFlag    = flag.BoolP("version", "V", false, "Print version")
 	clientFlag     = flag.BoolP("client", "c", false, "Generate NAME-service client")
-	transportFlag  = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|http|nats]")
+	transportFlag  = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|nats]")
 )
 
 var binName = filepath.Base(os.Args[0])
