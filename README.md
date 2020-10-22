@@ -51,8 +51,6 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
-- NATS 传输协议支持
-  根据参数生成不同传输协议代码  
 - 
 
 ## 参考
