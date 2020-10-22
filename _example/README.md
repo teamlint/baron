@@ -4,7 +4,7 @@
 Try generating it with:
 
 ```
-truss echo.proto
+baron echo.proto
 ```
 
 ### middlewares

@@ -117,7 +117,7 @@ tasks:
     desc: 'baron gen start service'
     dir: ./_example/
     cmds: 
-      - baron -v --svcout=./ ./api/start/start.proto
+      - baron -v -c --svcout=./ ./api/start/start.proto
     silent: false
 
   run-start:
