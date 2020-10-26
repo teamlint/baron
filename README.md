@@ -51,10 +51,14 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
-- 
+- server 增加初始化方法
 
 ## 参考
 - https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码
 - https://github.com/OahcUil94/go-kit-training go-kit微服务套件使用
 - https://github.com/phungvandat/clean-architecture Example about clean architecture in golang
 
+## 问题
+- 不支持标量类型转化为指针类型
+- 不支持结构体类型转化为非指针类型
+- gogoproto.stdtime选项, 支持不完善

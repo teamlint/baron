@@ -395,7 +395,7 @@ func (h httpError) Headers() http.Header {
 
 // Server Decode
 {{range $method := .HTTPHelper.Methods}}
-	{{- range $binding := $method.Bindings -}}
+	{{range $binding := $method.Bindings -}}
 	// DecodeHTTP{{$binding.Label}}Request is a transport/http.DecodeRequestFunc that
 	// decodes a JSON-encoded {{ToLower $binding.Parent.Name}} request from the HTTP request
 	// body. Primarily useful in a server.
