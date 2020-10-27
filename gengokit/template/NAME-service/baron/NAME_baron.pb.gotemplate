@@ -628,7 +628,14 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 					strval = string(tmp)
 					values.Add("{{$field.QueryParamName}}", strval)
 				{{else}}
+					{{/*如果是指针类型标量*/ -}}
+					{{if $field.StarExpr}}
+					if req.{{$field.CamelName}} !=nil {
+						values.Add("{{$field.QueryParamName}}", fmt.Sprint(*req.{{$field.CamelName}}))
+					}
+					{{else}}
 					values.Add("{{$field.QueryParamName}}", fmt.Sprint(req.{{$field.CamelName}}))
+					{{end}}
 				{{- end }}
 			{{- end }}
 		{{- end}}

@@ -570,6 +570,9 @@ func NewField(f *ast.Field) (*Field, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].type=%+v starexpr=%v\n", rv.Name, rv.Type.Name, rv.Type.StarExpr)
+	// isBaseType grpc 标量类型
+	isBaseType := rv.Type.Enum == nil && rv.Type.Map == nil
+	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Type=%+v,IsBaseType=%v,StarExpr=%v,Repeated=%v\n",
+		rv.Name, rv.Type.Name, isBaseType, rv.Type.StarExpr, rv.Type.ArrayType)
 	return rv, nil
 }

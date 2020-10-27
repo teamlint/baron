@@ -64,9 +64,21 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
+枚举值为空且Map值为空,即为BaseType,表示
+```go
+// Indicates whether this field represents a basic protobuf type such as
+// one of the ints, floats, strings, bools, etc. Since we can only create
+// automatic marshaling of base types, if this is false a warning is given
+// to the user.
+
+if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
+    option.IsBaseType = true
+}
+
+```
+
 ## TODO
-- HTTP API 方法生成问题
-- 使用protoc-gen-go/proto-gen-go-grpc包生成文件
+- 清理protoc-gen-gogo插件相关引用
 - server 增加初始化方法
 
 ## 参考
@@ -75,6 +87,6 @@ See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 - https://github.com/phungvandat/clean-architecture Example about clean architecture in golang
 
 ## 问题
-- 不支持标量类型转化为指针类型
+- 支持标量切片类型
 - 不支持结构体类型转化为非指针类型
 - gogoproto.stdtime选项, 支持不完善
