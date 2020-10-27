@@ -17,6 +17,7 @@
 syntax = "proto3";
 
 package google.api;
+option go_package = "github.com/teamlint/baron/deftree/googlethirdparty;google_api";
 
 import "github.com/teamlint/baron/deftree/googlethirdparty/http.proto"; // from google/api/http.proto // modified
 import "github.com/teamlint/baron/deftree/googlethirdparty/descriptor.proto"; // from google/protobuf/descriptor.proto // modified

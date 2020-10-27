@@ -278,13 +278,17 @@ func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 		}
 	}
 
-	// Get path names of .pb.go files
+	// Get path names of .pb.go|grpc.pb.go files
 	pbgoPaths := []string{}
 	for _, p := range protoDefPaths {
 		base := filepath.Base(p)
 		barename := strings.TrimSuffix(base, filepath.Ext(p))
+		// .pb.go
 		pbgp := filepath.Join(cfg.PBPath, barename+".pb.go")
 		pbgoPaths = append(pbgoPaths, pbgp)
+		// grpc.pb.go
+		grpcpbgp := filepath.Join(cfg.PBPath, barename+"_grpc.pb.go")
+		pbgoPaths = append(pbgoPaths, grpcpbgp)
 	}
 	pbgoFiles, err := openFiles(pbgoPaths)
 	if err != nil {
@@ -345,7 +349,7 @@ func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 	for _, p := range protoDefPaths {
 		base := filepath.Base(p)
 		barename := strings.TrimSuffix(base, filepath.Ext(p))
-		baronPath := filepath.Join(cfg.PBPath, barename+".pb.baron.go")
+		baronPath := filepath.Join(cfg.PBPath, barename+"_baron.pb.go")
 
 		// generate go-kit service
 		err := gengokit.GenerateBaronFile(sd, conf, baronPath)

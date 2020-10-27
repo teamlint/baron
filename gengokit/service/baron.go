@@ -1,3 +1,3 @@
 package service
 
-const BaronPath = "baron/NAME.pb.baron.gotemplate"
+const BaronPath = "baron/NAME_baron.pb.gotemplate"

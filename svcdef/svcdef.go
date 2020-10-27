@@ -205,6 +205,7 @@ func New(goFiles map[string]io.Reader, protoFiles map[string]io.Reader) (*Svcdef
 
 	for path, gofile := range goFiles {
 		fset := token.NewFileSet()
+		// log.Printf("ast path = %v, gofile=%v", path, gofile)
 		fileAst, err := parser.ParseFile(fset, "", gofile, parser.ParseComments)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot parse go file %q to create Svcdef", path)
@@ -224,8 +225,13 @@ func New(goFiles map[string]io.Reader, protoFiles map[string]io.Reader) (*Svcdef
 		oneofExists := map[string]struct{}{}
 
 		for _, t := range typespecs {
+			// log.Printf("range ast.TypeSpec item = %+v, type=%v", t, t.Type)
 			switch t.Type.(type) {
 			case *ast.InterfaceType:
+				// Exclude Unsave{NAME}Server interface
+				if strings.HasPrefix(t.Name.Name, "Unsafe") {
+					break
+				}
 				// Each service will have two interfaces ("{SVCNAME}Server" and
 				// "{SVCNAME}Client") each containing the same information that we
 				// care about, but structured a bit differently. Additionally,
@@ -244,9 +250,17 @@ func New(goFiles map[string]io.Reader, protoFiles map[string]io.Reader) (*Svcdef
 					}
 					break
 				}
+				// log.Printf("NewService ast.TypeSpec=%+v, DebugInfo=%+v", t, debugInfo)
 				nsvc, err := NewService(t, debugInfo)
 				if err != nil {
 					return nil, errors.Wrapf(err, "error parsing service %q", t.Name.Name)
+				}
+				log.Debugf("found service %v.Methods(%v)\n", nsvc.Name, len(nsvc.Methods))
+				for _, m := range nsvc.Methods {
+					log.Debugf("\t%v.Method = %v\n", nsvc.Name, m.Name)
+					for i, b := range m.Bindings {
+						log.Debugf("\t\t%v.%v.Bindings[%v] = %v\n", nsvc.Name, m.Name, i, b.Verb+"."+b.Path)
+					}
 				}
 				rv.Service = nsvc
 			}
@@ -346,6 +360,10 @@ func NewMessage(m *ast.TypeSpec) (*Message, error) {
 		if strings.HasPrefix(f.Names[0].Name, "XXX_") {
 			continue
 		}
+		// 如果不是可导出字段, 跳过
+		if !f.Names[0].IsExported() {
+			continue
+		}
 		nfield, err := NewField(f)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create field %q while creating message %q", f.Names[0].Name, rv.Name)
@@ -403,6 +421,11 @@ func NewService(s *ast.TypeSpec, info *DebugInfo) (*Service, error) {
 	}
 	asvc := s.Type.(*ast.InterfaceType)
 	for _, m := range asvc.Methods.List {
+		log.Debugf("NewService method = %v.%v", s.Name.Name, m.Names[0].Name)
+		if !ast.IsExported(m.Names[0].Name) {
+			log.Debugf("Not Exported %v.%v", s.Name.Name, m.Names[0].Name)
+			continue
+		}
 		nmeth, err := NewServiceMethod(m, info)
 		if err != nil {
 			return nil, errors.Wrapf(err, "cannot create service method %q of service %q", m.Names[0].Name, rv.Name)
@@ -542,9 +565,11 @@ func NewField(f *ast.Field) (*Field, error) {
 		}
 		return nil
 	}
+	log.Debugf("[svcdef/svcdef.go][NewField] origin field[%v].type=%+v\n", f.Names[0].Name, f.Type)
 	err := typeFollower(f.Type)
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].type=%+v starexpr=%v\n", rv.Name, rv.Type.Name, rv.Type.StarExpr)
 	return rv, nil
 }

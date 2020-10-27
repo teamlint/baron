@@ -25,7 +25,9 @@ func NewService() pb.{{GoName .Service.Name}}Server {
 	return &{{ToLower .Service.Name}}Service{}
 }
 
-type {{ToLower .Service.Name}}Service struct{}
+type {{ToLower .Service.Name}}Service struct {
+	pb.Unimplemented{{.Service.Name}}Server
+}
 
 {{with $te := . }}
 	{{range $i := $te.Service.Methods}}

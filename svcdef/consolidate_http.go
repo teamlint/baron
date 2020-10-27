@@ -52,6 +52,26 @@ func consolidateHTTP(sd *Svcdef, protoFiles map[string]io.Reader) error {
 
 			return errors.Wrap(err, "error while parsing http options for the service definition")
 		}
+		log.Printf("[svcdef/consolidate_http.go][consolidateHTTP] sd.Service=%+v, methods(%v)\n", sd.Service.Name, len(sd.Service.Methods))
+		// service methods
+		for _, m := range sd.Service.Methods {
+			log.Debugf("\t %v.%v,%v Message = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, m.RequestType.Message)
+			for _, f := range m.RequestType.Message.Fields {
+				log.Debugf("\t\t %v.%v,%v Message.Field = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, f)
+			}
+		}
+		log.Debugf("consolidateHTTP http.protosvc=%+v", protosvc)
+		for _, hm := range protosvc.Methods {
+			log.Debugf("\t http.%v RequestType=%v, ResponseType=%v, HTTPBindings=%+v\n",
+				hm.Name, hm.RequestType, hm.ResponseType, hm.HTTPBindings)
+			for _, b := range hm.HTTPBindings {
+				log.Debugf("\t\t http.Binding.Description = %+v\n", b.Description)
+				log.Debugf("\t\t http.Binding.CustomHTTPPattern = %+v\n", b.CustomHTTPPattern)
+				for _, f := range b.Fields {
+					log.Debugf("\t\t\t http.Binding.Field = %+v\n", f)
+				}
+			}
+		}
 		err = assembleHTTPParams(sd.Service, protosvc)
 		if err != nil {
 			return errors.Wrap(err, "while assembling HTTP parameters")

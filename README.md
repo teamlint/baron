@@ -5,24 +5,38 @@ Baron 根据 proto 文件快速生成 *.pb.go *.pb.baron.go(包含go-kit服务En
 
 ## 安装
 
-1. Install protoc 3 or newer. The easiest way is to
-download a release from [github](https://github.com/google/protobuf/releases)
-and add to `$PATH`.
-Otherwise [install from source.](https://github.com/google/protobuf)
-1. Install baron with
+### 安装 protoc 工具
 
-	```
-	go get -u -d github.com/teamlint/baron
-	cd $GOPATH/src/github.com/teamlint/baron
-	make dependencies
-	make
-	```
-	On Windows, do the following instead:
-	```
-	go get -u -d github.com/teamlint/baron
-	cd %GOPATH%/src/github.com/teamlint/baron
-	wininstall.bat
-	```
+[下载](https://github.com/protocolbuffers/protobuf) 并安装 protocol buffer 编译工具
+
+### 安装 protoc GO 语言代码生成插件
+
+```shell
+$ go install google.golang.org/protobuf/cmd/protoc-gen-go
+```
+
+### 安装 protoc GRPC GO 语言代码生成插件
+
+详细文档参考 [https://github.com/grpc/grpc-go](https://github.com/grpc/grpc-go)
+
+```shell
+$ go get -u google.golang.org/grpc
+```
+
+###  安装 baron 微服务框架代码生成工具
+
+```
+go get -u -d github.com/teamlint/baron
+cd $GOPATH/src/github.com/teamlint/baron
+make dependencies
+make
+```
+Windows 操作系统使用下面安装方式:
+```
+go get -u -d github.com/teamlint/baron
+cd %GOPATH%/src/github.com/teamlint/baron
+wininstall.bat
+```
 
 ## 使用
 
@@ -51,6 +65,8 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
+- HTTP API 方法生成问题
+- 使用protoc-gen-go/proto-gen-go-grpc包生成文件
 - server 增加初始化方法
 
 ## 参考

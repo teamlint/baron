@@ -33,8 +33,12 @@ func FromPaths(gopath []string, protoDefPaths []string) (string, error) {
 	for _, p := range protoDefPaths {
 		base := filepath.Base(p)
 		barename := strings.TrimSuffix(base, filepath.Ext(p))
+		// pb.go
 		pbgp := filepath.Join(td, barename+".pb.go")
 		pbgoPaths = append(pbgoPaths, pbgp)
+		// grpc.pb.go
+		grpcpbgp := filepath.Join(td, barename+"_grpc.pb.go")
+		pbgoPaths = append(pbgoPaths, grpcpbgp)
 	}
 
 	// Open all .pb.go files and store in map to be passed to svcdef.New()

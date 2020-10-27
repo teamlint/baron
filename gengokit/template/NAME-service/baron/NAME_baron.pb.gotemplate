@@ -23,8 +23,8 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/endpoint"
-	"github.com/gogo/protobuf/jsonpb"
-	"github.com/gogo/protobuf/proto"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	{{if eq .Config.Transport "all" "nats" }}
@@ -66,36 +66,37 @@ var (
 // single type that implements the Service interface. For example, you might
 // construct individual endpoints using transport/http.NewClient, combine them into an Endpoints, and return it to the caller as a Service.
 type Endpoints struct {
+	Unimplemented{{.Service.Name}}Server
 {{range $i := .Service.Methods}}
 	{{$i.Name}}Endpoint    endpoint.Endpoint
-{{- end}}
+{{end}}
 }
 
 // Endpoints
 {{range $i := .Service.Methods}}
-	func (e Endpoints) {{$i.Name}}(ctx context.Context, in *{{GoName $i.RequestType.Name}}) (*{{GoName $i.ResponseType.Name}}, error) {
-		response, err := e.{{$i.Name}}Endpoint(ctx, in)
-		if err != nil {
-			return nil, err
-		}
-		return response.(*{{GoName $i.ResponseType.Name}}), nil
+func (e Endpoints) {{$i.Name}}(ctx context.Context, in *{{GoName $i.RequestType.Name}}) (*{{GoName $i.ResponseType.Name}}, error) {
+	response, err := e.{{$i.Name}}Endpoint(ctx, in)
+	if err != nil {
+		return nil, err
 	}
+	return response.(*{{GoName $i.ResponseType.Name}}), nil
+}
 {{end}}
 
 // Make Endpoints
 {{with $te := .}}
-	{{range $i := $te.Service.Methods}}
-		func Make{{$i.Name}}Endpoint(s {{$te.Service.Name}}Server) endpoint.Endpoint {
-			return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-				req := request.(*{{GoName $i.RequestType.Name}})
-				v, err := s.{{$i.Name}}(ctx, req)
-				if err != nil {
-					return nil, err
-				}
-				return v, nil
-			}
+{{- range $i := $te.Service.Methods}}
+func Make{{$i.Name}}Endpoint(s {{$te.Service.Name}}Server) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(*{{GoName $i.RequestType.Name}})
+		v, err := s.{{$i.Name}}(ctx, req)
+		if err != nil {
+			return nil, err
 		}
-	{{end}}
+		return v, nil
+	}
+}
+{{- end}}
 {{end}}
 
 // WrapAllExcept wraps each Endpoint field of struct Endpoints with a
@@ -181,6 +182,7 @@ func MakeGRPCServer(endpoints Endpoints, options ...grpctransport.ServerOption) 
 
 // grpcServer implements the {{GoName .Service.Name}}Server interface
 type grpcServer struct {
+	Unimplemented{{.Service.Name}}Server
 {{range $i := .Service.Methods}}
 	{{ToLower $i.Name}}   grpctransport.Handler
 {{- end}}
@@ -241,18 +243,18 @@ func NewGRPCClient(conn *grpc.ClientConn, options ...grpctransport.ClientOption)
 	{{- with $te := .}}
 		{{- with $pkgName := $te.PackageName}}
 			{{- range $i := $te.Service.Methods}}
-				var {{ToLower $i.Name}}Endpoint endpoint.Endpoint
-				{
-					{{ToLower $i.Name}}Endpoint = grpctransport.NewClient(
-						conn,
-						"{{$pkgName}}.{{$te.Service.Name}}",
-						"{{$i.Name}}",
-						EncodeGRPC{{$i.Name}}Request,
-						DecodeGRPC{{$i.Name}}Response,
-						{{GoName $i.ResponseType.Name}}{},
-						options...,
-					).Endpoint()
-				}
+	var {{ToLower $i.Name}}Endpoint endpoint.Endpoint
+	{
+		{{ToLower $i.Name}}Endpoint = grpctransport.NewClient(
+			conn,
+			"{{$pkgName}}.{{$te.Service.Name}}",
+			"{{$i.Name}}",
+			EncodeGRPC{{$i.Name}}Request,
+			DecodeGRPC{{$i.Name}}Response,
+			{{GoName $i.ResponseType.Name}}{},
+			options...,
+		).Endpoint()
+	}
 			{{end}}
 		{{end}}
 	{{end}}

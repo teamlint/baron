@@ -54,6 +54,8 @@ type Field struct {
 	// The type within the Go language that's used to represent the original
 	// field that this field refers to.
 	GoType string
+	// 是否为指针类型
+	StarExpr bool
 	// The string form of the function to be used to convert the incoming
 	// string msg from a string into it's intended type.
 	ConvertFunc string
