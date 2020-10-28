@@ -91,4 +91,3 @@ if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 
 ## 问题
 - 不支持结构体类型转化为非指针类型
-- gogoproto.stdtime选项, 支持不完善
