@@ -1,17 +1,3 @@
-package templates
-
-const ServiceMethods = `
-{{ with $te := .}}
-		{{range $i := .Methods}}
-		func (s *{{ToLower $te.ServiceName}}Service) {{.Name}}(ctx context.Context, in *pb.{{GoName .RequestType.Name}}) (*pb.{{GoName .ResponseType.Name}}, error){
-			var resp pb.{{GoName .ResponseType.Name}}
-			return &resp, nil
-		}
-		{{end}}
-{{- end}}
-`
-
-const Services = `
 package service
 
 import (
@@ -37,4 +23,3 @@ type {{ToLower .Service.Name}}Service struct {
 		}
 	{{end}}
 {{- end}}
-`

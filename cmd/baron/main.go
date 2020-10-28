@@ -27,6 +27,8 @@ import (
 
 const (
 	handlersDirName = "service"
+	cmdDirName      = "cmd"
+	serverDirName   = "server"
 )
 
 var (
@@ -249,7 +251,7 @@ func parseInput() (*config.Config, error) {
 	log.WithField("Service Path", cfg.ServicePath).Debug()
 
 	// PrevGen
-	cfg.PrevGen, err = readPreviousGeneration(cfg.ServicePath)
+	cfg.PrevGen, err = readPreviousGeneration(cfg.ServicePath, svcName)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot read previously generated files")
 	}
@@ -349,7 +351,7 @@ func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 	for _, p := range protoDefPaths {
 		base := filepath.Base(p)
 		barename := strings.TrimSuffix(base, filepath.Ext(p))
-		baronPath := filepath.Join(cfg.PBPath, barename+"_baron.pb.go")
+		baronPath := filepath.Join(cfg.PBPath, barename+".pb.baron.go")
 
 		// generate go-kit service
 		err := gengokit.GenerateBaronFile(sd, conf, baronPath)
@@ -398,7 +400,7 @@ func cleanProtofilePath(rawPaths []string) ([]string, error) {
 }
 
 // readPreviousGeneration returns a map[string]io.Reader representing the files in serviceDir
-func readPreviousGeneration(serviceDir string) (map[string]io.Reader, error) {
+func readPreviousGeneration(serviceDir string, svcName string) (map[string]io.Reader, error) {
 	if !fileExists(serviceDir) {
 		return nil, nil
 	}
@@ -411,7 +413,7 @@ func readPreviousGeneration(serviceDir string) (map[string]io.Reader, error) {
 			// Only files within the handlers dir are used to
 			// support regeneration.
 			// See `gengokit/generator/gen.go:generateResponseFile`
-			case filepath.Base(serviceDir), handlersDirName:
+			case filepath.Base(serviceDir), svcName, svcName + "-client", handlersDirName, cmdDirName, serverDirName:
 				return nil
 			default:
 				return filepath.SkipDir
@@ -431,7 +433,7 @@ func readPreviousGeneration(serviceDir string) (map[string]io.Reader, error) {
 
 		// ensure relPath is unix-style, so it matches what we look for later
 		relPath = filepath.ToSlash(relPath)
-
+		log.Debugf("[parseInput] prev file = %v\n", relPath)
 		files[relPath] = file
 
 		return nil

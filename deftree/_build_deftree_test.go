@@ -11,8 +11,8 @@ import (
 	// in the sources below.
 	_ "github.com/teamlint/baron/deftree/googlethirdparty"
 
-	"github.com/gogo/protobuf/proto"
-	descriptor "github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
+	"github.com/golang/protobuf/proto"
+	descriptor "github.com/golang/protobuf/protoc-gen-go/descriptor"
 )
 
 var gopath []string

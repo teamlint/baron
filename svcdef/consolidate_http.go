@@ -52,12 +52,20 @@ func consolidateHTTP(sd *Svcdef, protoFiles map[string]io.Reader) error {
 
 			return errors.Wrap(err, "error while parsing http options for the service definition")
 		}
-		log.Printf("[svcdef/consolidate_http.go][consolidateHTTP] sd.Service=%+v, methods(%v)\n", sd.Service.Name, len(sd.Service.Methods))
+		if sd == nil {
+			return errors.New("Svcdef is nil")
+		}
+		if protosvc == nil {
+			return errors.New("protosvc is nil")
+		}
+		// log.Printf("[svcdef/consolidate_http.go][consolidateHTTP] sd.Service=%+v, methods(%v)\n", sd.Service.Name, len(sd.Service.Methods))
 		// service methods
-		for _, m := range sd.Service.Methods {
-			log.Debugf("\t %v.%v,%v Message = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, m.RequestType.Message)
-			for _, f := range m.RequestType.Message.Fields {
-				log.Debugf("\t\t %v.%v,%v Message.Field = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, f)
+		if sd.Service != nil {
+			for _, m := range sd.Service.Methods {
+				log.Debugf("\t %v.%v,%v Message = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, m.RequestType.Message)
+				for _, f := range m.RequestType.Message.Fields {
+					log.Debugf("\t\t %v.%v,%v Message.Field = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, f)
+				}
 			}
 		}
 		log.Debugf("consolidateHTTP http.protosvc=%+v", protosvc)
@@ -85,6 +93,9 @@ func consolidateHTTP(sd *Svcdef, protoFiles map[string]io.Reader) error {
 // location, and the field to which it refers.
 func assembleHTTPParams(svc *Service, httpsvc *svcparse.Service) error {
 	getMethNamed := func(name string) *ServiceMethod {
+		if svc == nil {
+			return nil
+		}
 		for _, m := range svc.Methods {
 			// Have to CamelCase the data from the parser since it may be lowercase
 			// while the name from the Go file will be CamelCased

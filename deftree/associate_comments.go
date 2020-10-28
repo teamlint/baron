@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	log "github.com/sirupsen/logrus"
-	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
 )
 
 func init() {

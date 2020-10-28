@@ -1,6 +1,3 @@
-package templates
-
-const Hook = `
 package service
 
 import (
@@ -19,4 +16,3 @@ func InterruptHandler(errc chan<- error) {
 
 	errc <- terminateError
 }
-`
