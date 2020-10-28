@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/gogo/protobuf/proto"
-	plugin "github.com/gogo/protobuf/protoc-gen-gogo/plugin"
+	"github.com/golang/protobuf/proto"
+	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -38,34 +38,11 @@ func GeneratePBDotGo(protoPaths, gopath []string, outDir string) error {
 	// exec protoc
 	err = protoc(protoPaths, gopath, genGoCode)
 	if err != nil {
-		return errors.Wrap(err, "cannot exec protoc with protoc-gen-gogo")
+		return errors.Wrap(err, "cannot exec protoc with protoc-gen-go")
 	}
 
 	return nil
 }
-
-// func GeneratePBDotGo(protoPaths, gopath []string, outDir string) error {
-
-// 	genGoCode := "--gogofaster_out=" +
-// 		"Mgoogle/protobuf/any.proto=github.com/gogo/protobuf/types," +
-// 		"Mgoogle/protobuf/duration.proto=github.com/gogo/protobuf/types," +
-// 		"Mgoogle/protobuf/struct.proto=github.com/gogo/protobuf/types," +
-// 		"Mgoogle/protobuf/timestamp.proto=github.com/gogo/protobuf/types," +
-// 		"Mgoogle/protobuf/wrappers.proto=github.com/gogo/protobuf/types," +
-// 		"paths=source_relative,plugins=grpc:" + outDir
-
-// 	_, err := exec.LookPath("protoc-gen-gogo")
-// 	if err != nil {
-// 		return errors.Wrap(err, "cannot find protoc-gen-gogo in PATH")
-// 	}
-
-// 	err = protoc(protoPaths, gopath, genGoCode)
-// 	if err != nil {
-// 		return errors.Wrap(err, "cannot exec protoc with protoc-gen-gogo")
-// 	}
-
-// 	return nil
-// }
 
 // CodeGeneratorRequest returns a protoc CodeGeneratorRequest from running
 // protoc on protoPaths

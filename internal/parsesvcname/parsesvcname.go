@@ -1,6 +1,3 @@
-// Package parsesvcname will parse the service name of a protobuf package. The
-// name returned will always be camelcased according to the conventions
-// outlined in github.com/gogo/protobuf/protoc-gen-gogo/generator.CamelCase.
 package parsesvcname
 
 import (
