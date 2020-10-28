@@ -23,12 +23,12 @@ FOR /F "tokens=* USEBACKQ" %%F IN (`%DATE_FMT_CMD%`) DO (
 @ECHO ON
 go get github.com/pauln/go-datefmt
 
-:: go get github.com/gogo/protobuf/protoc-gen-gogo
-go get -u github.com/gogo/protobuf/protoc-gen-gogo@21df5aa0e680850681b8643f0024f92d3b09930c
-go get -u github.com/gogo/protobuf/protoc-gen-gogofaster@21df5aa0e680850681b8643f0024f92d3b09930c
+:: go get github.com/golang/protobuf/protoc-gen-go
+go get -u github.com/golang/protobuf/protoc-gen-go@21df5aa0e680850681b8643f0024f92d3b09930c
+go get -u github.com/golang/protobuf/protoc-gen-gofaster@21df5aa0e680850681b8643f0024f92d3b09930c
 
-:: go get github.com/gogo/protobuf/proto
-go get -u github.com/gogo/protobuf/proto@21df5aa0e680850681b8643f0024f92d3b09930c
+:: go get github.com/golang/protobuf/proto
+go get -u github.com/golang/protobuf/proto@21df5aa0e680850681b8643f0024f92d3b09930c
 
 :: go get github.com/jteeuwen/go-bindata/...
 go get -u github.com/kevinburke/go-bindata/go-bindata

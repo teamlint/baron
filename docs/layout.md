@@ -232,7 +232,7 @@ sequenceDiagram
 │   │   │       ├── LICENSE
 │   │   │       ├── gogoproto
 │   │   │       ├── proto
-│   │   │       └── protoc-gen-gogo
+│   │   │       └── protoc-gen-go
 │   │   ├── konsorten
 │   │   │   └── go-windows-terminal-sequences
 │   │   │       ├── LICENSE

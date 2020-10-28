@@ -78,12 +78,11 @@ if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 ```
 
 ## TODO
-- 清理protoc-gen-gogo插件相关引用
-- 支持标量切片类型
+- 清理protoc-gen-go插件相关引用
+- 完善 deftree/googlethirdparty
 - server 增加初始化方法
 - HTTP Transport 是否考虑使用[gRPC Gateway](https://github.com/grpc-ecosystem/grpc-gateway) 替换?
-  gGRPC Gateway使用自有mux提供服务, 不能再使用 Go-kit 的http传输
-- 不覆盖代码
+- 支持标量切片类型
 
 ## 参考
 - https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码

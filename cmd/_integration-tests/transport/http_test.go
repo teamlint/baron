@@ -18,7 +18,7 @@ import (
 	pb "github.com/teamlint/baron/cmd/_integration-tests/transport/proto"
 	httpclient "github.com/teamlint/baron/cmd/_integration-tests/transport/transportpermutations-service/svc/client/http"
 
-	"github.com/gogo/protobuf/jsonpb"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/moul/http2curl"
 	"github.com/pkg/errors"
 

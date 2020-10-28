@@ -6,7 +6,7 @@ import (
 	"strings"
 	"text/template"
 
-	generatego "github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	generatego "github.com/golang/protobuf/protoc-gen-go/generator"
 	"github.com/pkg/errors"
 
 	"github.com/teamlint/baron/gengokit/httptransport"
