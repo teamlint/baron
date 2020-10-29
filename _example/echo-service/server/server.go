@@ -15,6 +15,7 @@ import (
 	"github.com/nats-io/nats.go"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	// This Service
 	pb "github.com/teamlint/baron/_example/api/echo"
@@ -106,6 +107,8 @@ func Run(cfg Config) {
 		srv := pb.MakeGRPCServer(endpoints)
 		s := grpc.NewServer()
 		pb.RegisterEchoServer(s, srv)
+		// Register reflection service on gRPC server.
+		reflection.Register(s)
 
 		errc <- s.Serve(ln)
 	}()

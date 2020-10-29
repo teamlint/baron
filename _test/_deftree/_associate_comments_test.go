@@ -10,7 +10,7 @@ func TestCommentedEnum(t *testing.T) {
 	defStr := `
 		syntax = "proto3";
 		package general;
-		import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
+		import "github.com/teamlint/baron/deftree/third_party/googleapis/annotations.proto";
 
 		enum FooBarBaz {
 			// This is my comment, this is my note

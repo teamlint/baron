@@ -113,6 +113,8 @@ func protoc(protoPaths, gopath []string, plugin []string) error {
 
 	for _, gp := range gopath {
 		cmdArgs = append(cmdArgs, "-I"+filepath.Join(gp, "src"))
+		// third_party googleapis 内部使用的减少引用路径
+		cmdArgs = append(cmdArgs, "-I"+filepath.Join(gp, "src", "github.com", "teamlint", "baron", "third_party", "googleapis"))
 	}
 
 	cmdArgs = append(cmdArgs, plugin...)

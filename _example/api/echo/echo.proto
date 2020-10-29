@@ -8,8 +8,9 @@ syntax = "proto3";
 // for `package echo;` baron will create the directory "echo-service".
 package echo;
 
-import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
+/* import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto"; */
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 service Echo {
   // Echo "echos" the incoming string

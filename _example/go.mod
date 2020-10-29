@@ -8,12 +8,17 @@ require (
 	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.3
 	github.com/gorilla/mux v1.8.0
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.0.1 // indirect
 	github.com/nats-io/nats.go v1.9.1
 	github.com/pkg/errors v0.9.1
 	github.com/rs/xid v1.2.1 // indirect
-	github.com/teamlint/baron v0.2.1
+	github.com/sirupsen/logrus v1.7.0 // indirect
+	github.com/teamlint/baron v0.2.3
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
-	google.golang.org/grpc v1.33.0
+	golang.org/x/sys v0.0.0-20201020230747-6e5568b54d1a // indirect
+	golang.org/x/tools v0.0.0-20201022035929-9cf592e881e9 // indirect
+	google.golang.org/genproto v0.0.0-20201019141844-1ed22bb0c154
+	google.golang.org/grpc v1.33.1
 	google.golang.org/protobuf v1.25.0
 )
 

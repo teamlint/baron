@@ -22,4 +22,4 @@ Session.vi
 
 # jetbrains project files
 .idea
-
+.DS_Store
