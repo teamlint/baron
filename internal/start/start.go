@@ -7,9 +7,9 @@ import (
 	"strings"
 	"text/template"
 
-	gogen "github.com/golang/protobuf/protoc-gen-go/generator"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"github.com/teamlint/baron/pkg"
 )
 
 type protoInfo struct {
@@ -35,7 +35,7 @@ func (p protoInfo) ServiceName() string {
 	a := p.alias
 	a = strings.Replace(a, "-", "_", -1)
 	a = strings.Replace(a, " ", "_", -1)
-	return gogen.CamelCase(a)
+	return pkg.GoCamelCase(a)
 }
 
 // Do writes a default protobuf file to the current directory, in a file named

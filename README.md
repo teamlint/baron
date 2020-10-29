@@ -78,16 +78,15 @@ if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 ```
 
 ## TODO
-- 清理protoc-gen-go插件相关引用
-- 完善 deftree/googlethirdparty
-- server 增加初始化方法
-- HTTP Transport 是否考虑使用[gRPC Gateway](https://github.com/grpc-ecosystem/grpc-gateway) 替换?
 - 支持标量切片类型
+- server 增加初始化方法
 
 ## 参考
 - https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码
 - https://github.com/OahcUil94/go-kit-training go-kit微服务套件使用
 - https://github.com/phungvandat/clean-architecture Example about clean architecture in golang
+- https://github.com/nametake/protoc-gen-gohttp protoc plugin to generate to Go's net/http converter
+- https://github.com/grpc-ecosystem/grpc-gateway/blob/4ba7ec0bc390cae4a2d03625ac122aa8a772ac3a/protoc-gen-grpc-gateway/httprule/parse.go
 
 ## 问题
 - 不支持结构体类型转化为非指针类型

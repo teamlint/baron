@@ -23,24 +23,25 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/endpoint"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
+
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
-	{{if eq .Config.Transport "all" "nats" }}
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
+	{{- if eq .Config.Transport "all" "nats" }}
 	"github.com/nats-io/nats.go"
-	{{end}}
-	{{if eq .Config.Transport "all" "grpc" }}
+	{{- end}}
+	{{- if eq .Config.Transport "all" "grpc" }}
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	{{end}}
+	{{- end}}
 	{{if eq .Config.Transport "all" "grpc" }}
 	grpctransport "github.com/go-kit/kit/transport/grpc"
-	{{end}}
+	{{- end}}
 	httptransport "github.com/go-kit/kit/transport/http"
-	{{if eq .Config.Transport "all" "nats" }}
+	{{- if eq .Config.Transport "all" "nats" }}
 	natstransport "github.com/go-kit/kit/transport/nats"
-	{{end}}
+	{{- end}}
 )
 
 
@@ -410,10 +411,15 @@ func (h httpError) Headers() http.Header {
 		}
 		if len(buf) > 0 {
 			// AllowUnknownFields stops the unmarshaler from failing if the JSON contains unknown fields.
-			unmarshaller := jsonpb.Unmarshaler{
-				AllowUnknownFields: true,
+			// unmarshaller := jsonpb.Unmarshaler{
+			// 	AllowUnknownFields: true,
+			// }
+			unmarshaller := protojson.UnmarshalOptions{
+				AllowPartial:   true,
+				DiscardUnknown: true,
 			}
-			if err = unmarshaller.Unmarshal(bytes.NewBuffer(buf), &req); err != nil {
+			// if err = unmarshaller.Unmarshal(bytes.NewBuffer(buf), &req); err != nil {
+			if err = unmarshaller.Unmarshal(buf, &req); err != nil {
 				const size = 8196
 				if len(buf) > size {
 					buf = buf[:size]
@@ -450,13 +456,24 @@ func (h httpError) Headers() http.Header {
 // EncodeHTTPGenericResponse is a transport/http.EncodeResponseFunc that encodes
 // the response as JSON to the response writer. Primarily useful in a server.
 func EncodeHTTPGenericResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	marshaller := jsonpb.Marshaler{
-		EmitDefaults: true,
-		OrigName: true,
-		EnumsAsInts:  true,
+	// marshaller := jsonpb.Marshaler{
+	// 	EmitDefaults: true,
+	// 	OrigName: true,
+	// 	EnumsAsInts:  true,
+	// }
+	// return marshaller.Marshal(w, response.(proto.Message))
+	marshaller := protojson.MarshalOptions{
+		AllowPartial:    true,
+		UseProtoNames:   false,
+		UseEnumNumbers:  true,
+		EmitUnpopulated: true,
 	}
-
-	return marshaller.Marshal(w, response.(proto.Message))
+	buf, err := marshaller.Marshal(response.(proto.Message))
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(buf)
+	return err
 }
 
 // Helper functions
@@ -570,7 +587,10 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 		}
 
 		var resp {{GoName $method.ResponseType}}
-		if err = jsonpb.UnmarshalString(string(buf), &resp); err != nil {
+		// if err = jsonpb.UnmarshalString(string(buf), &resp); err != nil {
+		// 	return nil, errorDecoder(buf)
+		// }
+		if err = protojson.Unmarshal(buf, &resp); err != nil {
 			return nil, errorDecoder(buf)
 		}
 

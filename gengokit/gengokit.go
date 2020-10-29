@@ -6,11 +6,11 @@ import (
 	"strings"
 	"text/template"
 
-	generatego "github.com/golang/protobuf/protoc-gen-go/generator"
 	"github.com/pkg/errors"
 
 	"github.com/teamlint/baron/gengokit/httptransport"
 	templFiles "github.com/teamlint/baron/gengokit/template"
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -37,7 +37,7 @@ var FuncMap = template.FuncMap{
 	"ToLower":  strings.ToLower,
 	"ToUpper":  strings.ToUpper,
 	"Title":    strings.Title,
-	"GoName":   generatego.CamelCase,
+	"GoName":   pkg.GoCamelCase,
 	"Contains": strings.Contains,
 }
 

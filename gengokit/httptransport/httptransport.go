@@ -11,10 +11,10 @@ import (
 	"text/template"
 	"unicode"
 
-	gogen "github.com/golang/protobuf/protoc-gen-go/generator"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -91,11 +91,11 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 			option := Field{
 				Name:           oneofType.Name,
 				QueryParamName: oneofType.PBFieldName,
-				CamelName:      gogen.CamelCase(field.Name),
+				CamelName:      pkg.GoCamelCase(field.Name),
 				LowCamelName:   LowCamelName(oneofType.Name),
 				Repeated:       oneofType.Type.ArrayType,
 				GoType:         oneofType.Type.Name,
-				LocalName:      fmt.Sprintf("%s%s", gogen.CamelCase(oneofType.Name), gogen.CamelCase(meth.Name)),
+				LocalName:      fmt.Sprintf("%s%s", pkg.GoCamelCase(oneofType.Name), pkg.GoCamelCase(meth.Name)),
 			}
 			if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 				option.IsBaseType = true
@@ -114,8 +114,8 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 
 			option.IsEnum = oneofType.Type.Enum != nil
 			option.ConvertFunc, option.ConvertFuncNeedsErrorCheck = createDecodeConvertFunc(option)
-			// option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
-			option.TypeConversion = fmt.Sprintf("&%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			// option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			option.TypeConversion = fmt.Sprintf("&%s{%s: %s}", oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
 			option.ZeroValue = getZeroValue(option)
 
 			oneofField.Options = append(oneofField.Options, option)
@@ -133,13 +133,13 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 		newField := Field{
 			Name:           field.Name,
 			QueryParamName: field.PBFieldName,
-			CamelName:      gogen.CamelCase(field.Name),
+			CamelName:      pkg.GoCamelCase(field.Name),
 			LowCamelName:   LowCamelName(field.Name),
 			Location:       param.Location,
 			Repeated:       field.Type.ArrayType,
 			GoType:         field.Type.Name,
 			StarExpr:       field.Type.StarExpr,
-			LocalName:      fmt.Sprintf("%s%s", gogen.CamelCase(field.Name), gogen.CamelCase(meth.Name)),
+			LocalName:      fmt.Sprintf("%s%s", pkg.GoCamelCase(field.Name), pkg.GoCamelCase(meth.Name)),
 		}
 		// log.Debugf("NewBinding field = %+v\n", newField)
 
@@ -258,12 +258,12 @@ func (b *Binding) PathSections() []string {
 	for _, part := range parts {
 		if len(part) > 2 && part[0] == '{' && part[len(part)-1] == '}' {
 			name := RemoveBraces(part)
-			if _, ok := isEnum[gogen.CamelCase(name)]; ok {
-				convert := fmt.Sprintf("fmt.Sprintf(\"%%d\", req.%v)", gogen.CamelCase(name))
+			if _, ok := isEnum[pkg.GoCamelCase(name)]; ok {
+				convert := fmt.Sprintf("fmt.Sprintf(\"%%d\", req.%v)", pkg.GoCamelCase(name))
 				rv = append(rv, convert)
 				continue
 			}
-			convert := fmt.Sprintf("fmt.Sprint(req.%v)", gogen.CamelCase(name))
+			convert := fmt.Sprintf("fmt.Sprint(req.%v)", pkg.GoCamelCase(name))
 			rv = append(rv, convert)
 		} else {
 			// Add quotes around things which'll be embeded as string literals,
@@ -546,7 +546,7 @@ func EnglishNumber(i int) string {
 // LowCamelName returns a CamelCased string, but with the first letter
 // lowercased. "example_name" becomes "exampleName".
 func LowCamelName(s string) string {
-	s = gogen.CamelCase(s)
+	s = pkg.GoCamelCase(s)
 	new := []rune(s)
 	if len(new) < 1 {
 		return s
@@ -563,7 +563,7 @@ var TemplateFuncs = template.FuncMap{
 	"ToLower":  strings.ToLower,
 	"ToUpper":  strings.ToUpper,
 	"Title":    strings.Title,
-	"GoName":   gogen.CamelCase,
+	"GoName":   pkg.GoCamelCase,
 	"Contains": strings.Contains,
 }
 

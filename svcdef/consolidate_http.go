@@ -9,8 +9,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	gogen "github.com/golang/protobuf/protoc-gen-go/generator"
-
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef/svcparse"
 )
 
@@ -99,7 +98,7 @@ func assembleHTTPParams(svc *Service, httpsvc *svcparse.Service) error {
 		for _, m := range svc.Methods {
 			// Have to CamelCase the data from the parser since it may be lowercase
 			// while the name from the Go file will be CamelCased
-			if m.Name == gogen.CamelCase(name) {
+			if m.Name == pkg.GoCamelCase(name) {
 				return m
 			}
 		}
@@ -170,7 +169,7 @@ func paramLocation(field *Field, binding *svcparse.HTTPBinding) string {
 	for _, param := range pathParams {
 		// Have to CamelCase the data from the parser since it may be lowercase
 		// while the name from the Go file will be CamelCased
-		if gogen.CamelCase(strings.Split(param, ".")[0]) == field.Name {
+		if pkg.GoCamelCase(strings.Split(param, ".")[0]) == field.Name {
 			return "path"
 		}
 	}
@@ -182,7 +181,7 @@ func paramLocation(field *Field, binding *svcparse.HTTPBinding) string {
 				return "body"
 				// Have to CamelCase the fields from the protobuf file, as they may
 				// be lowercase while the name from the Go file will be CamelCased.
-			} else if gogen.CamelCase(strings.Split(optField.Value, ".")[0]) == field.Name {
+			} else if pkg.GoCamelCase(strings.Split(optField.Value, ".")[0]) == field.Name {
 				return "body"
 			}
 		}

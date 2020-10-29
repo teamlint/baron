@@ -1,5 +1,3 @@
-// Package execprotoc provides an interface for interacting with proto
-// requiring only paths to files on disk
 package execprotoc
 
 import (
@@ -8,8 +6,6 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/golang/protobuf/proto"
-	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -49,6 +45,7 @@ func GeneratePBDotGo(protoPaths, gopath []string, outDir string) error {
 // TODO: replace getProtocOutput with some other way of getting the protoc ast.
 // i.e. the binary data that will allow proto.Unmarshal to Unmashal the
 // .proto file into a *plugin.CodeGeneratorRequest
+/*
 func CodeGeneratorRequest(protoPaths, gopath []string) (*plugin.CodeGeneratorRequest, error) {
 	protocOut, err := getProtocOutput(protoPaths, gopath)
 	if err != nil {
@@ -62,6 +59,7 @@ func CodeGeneratorRequest(protoPaths, gopath []string) (*plugin.CodeGeneratorReq
 
 	return req, nil
 }
+*/
 
 // TODO: getProtocOutput is broken because golang protoc plugins no longer can
 // have UTF-8 in the output. This caused protoc-gen-baron-protocast to fail to

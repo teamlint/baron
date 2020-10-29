@@ -5,21 +5,19 @@ go 1.15
 require (
 	github.com/go-kit/kit v0.10.0
 	github.com/goava/di v1.2.1
-	github.com/gogo/protobuf v1.3.1
 	github.com/golang/protobuf v1.4.3
+	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/gorilla/mux v1.8.0
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.0.1 // indirect
 	github.com/nats-io/nats.go v1.9.1
 	github.com/pkg/errors v0.9.1
-	github.com/rs/xid v1.2.1 // indirect
-	github.com/sirupsen/logrus v1.7.0 // indirect
-	github.com/teamlint/baron v0.2.3
+	github.com/rs/xid v1.2.1
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 	golang.org/x/sys v0.0.0-20201020230747-6e5568b54d1a // indirect
-	golang.org/x/tools v0.0.0-20201022035929-9cf592e881e9 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/genproto v0.0.0-20201019141844-1ed22bb0c154
 	google.golang.org/grpc v1.33.1
 	google.golang.org/protobuf v1.25.0
+	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-replace github.com/teamlint/baron v0.2.1 => ../
+replace github.com/teamlint/baron v0.2.3 => ../
