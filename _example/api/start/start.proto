@@ -1,0 +1,30 @@
+
+syntax = "proto3";
+
+package start;
+
+option go_package=".;start";
+
+import "google/api/annotations.proto";
+
+service Start {
+  rpc Status(StatusRequest) returns (StatusResponse) {
+    option (google.api.http) = {
+      get: "/status"
+    };
+  }
+}
+
+enum ServiceStatus {
+  FAIL = 0;
+  OK = 1;
+}
+
+message StatusRequest {
+  bool full = 1;
+  optional string msg = 2;
+}
+
+message StatusResponse {
+  ServiceStatus status = 1;
+}

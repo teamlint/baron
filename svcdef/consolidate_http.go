@@ -9,8 +9,7 @@ import (
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
-	gogen "github.com/gogo/protobuf/protoc-gen-gogo/generator"
-
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef/svcparse"
 )
 
@@ -52,6 +51,34 @@ func consolidateHTTP(sd *Svcdef, protoFiles map[string]io.Reader) error {
 
 			return errors.Wrap(err, "error while parsing http options for the service definition")
 		}
+		if sd == nil {
+			return errors.New("Svcdef is nil")
+		}
+		if protosvc == nil {
+			return errors.New("protosvc is nil")
+		}
+		// log.Printf("[svcdef/consolidate_http.go][consolidateHTTP] sd.Service=%+v, methods(%v)\n", sd.Service.Name, len(sd.Service.Methods))
+		// service methods
+		if sd.Service != nil {
+			for _, m := range sd.Service.Methods {
+				log.Debugf("\t %v.%v,%v Message = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, m.RequestType.Message)
+				for _, f := range m.RequestType.Message.Fields {
+					log.Debugf("\t\t %v.%v,%v Message.Field = %+v\n", sd.Service.Name, m.Name, m.RequestType.Name, f)
+				}
+			}
+		}
+		log.Debugf("consolidateHTTP http.protosvc=%+v", protosvc)
+		for _, hm := range protosvc.Methods {
+			log.Debugf("\t http.%v RequestType=%v, ResponseType=%v, HTTPBindings=%+v\n",
+				hm.Name, hm.RequestType, hm.ResponseType, hm.HTTPBindings)
+			for _, b := range hm.HTTPBindings {
+				log.Debugf("\t\t http.Binding.Description = %+v\n", b.Description)
+				log.Debugf("\t\t http.Binding.CustomHTTPPattern = %+v\n", b.CustomHTTPPattern)
+				for _, f := range b.Fields {
+					log.Debugf("\t\t\t http.Binding.Field = %+v\n", f)
+				}
+			}
+		}
 		err = assembleHTTPParams(sd.Service, protosvc)
 		if err != nil {
 			return errors.Wrap(err, "while assembling HTTP parameters")
@@ -65,10 +92,13 @@ func consolidateHTTP(sd *Svcdef, protoFiles map[string]io.Reader) error {
 // location, and the field to which it refers.
 func assembleHTTPParams(svc *Service, httpsvc *svcparse.Service) error {
 	getMethNamed := func(name string) *ServiceMethod {
+		if svc == nil {
+			return nil
+		}
 		for _, m := range svc.Methods {
 			// Have to CamelCase the data from the parser since it may be lowercase
 			// while the name from the Go file will be CamelCased
-			if m.Name == gogen.CamelCase(name) {
+			if m.Name == pkg.GoCamelCase(name) {
 				return m
 			}
 		}
@@ -139,7 +169,7 @@ func paramLocation(field *Field, binding *svcparse.HTTPBinding) string {
 	for _, param := range pathParams {
 		// Have to CamelCase the data from the parser since it may be lowercase
 		// while the name from the Go file will be CamelCased
-		if gogen.CamelCase(strings.Split(param, ".")[0]) == field.Name {
+		if pkg.GoCamelCase(strings.Split(param, ".")[0]) == field.Name {
 			return "path"
 		}
 	}
@@ -151,7 +181,7 @@ func paramLocation(field *Field, binding *svcparse.HTTPBinding) string {
 				return "body"
 				// Have to CamelCase the fields from the protobuf file, as they may
 				// be lowercase while the name from the Go file will be CamelCased.
-			} else if gogen.CamelCase(strings.Split(optField.Value, ".")[0]) == field.Name {
+			} else if pkg.GoCamelCase(strings.Split(optField.Value, ".")[0]) == field.Name {
 				return "body"
 			}
 		}

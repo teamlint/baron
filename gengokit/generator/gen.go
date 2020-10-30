@@ -39,8 +39,8 @@ func GenerateGokit(sd *svcdef.Svcdef, conf gengokit.Config) (map[string]io.Reade
 	svcname := strings.ToLower(sd.Service.Name)
 	for _, templPath := range templFiles.AssetNames() {
 
-		// 排除 pb.baron.go 模板
-		if templPath == service.BaronPath {
+		// 排除不自动生成的模板
+		if service.IsExcludedPath(templPath) {
 			continue
 		}
 		// Re-derive the actual path for this file based on the service output
@@ -101,26 +101,37 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 		}
 
 		if genCode, err = h.Render(templFP, data); err != nil {
-			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
+			return nil, errors.Wrapf(err, "cannot render service template: %s", templFP)
 		}
 	case service.HookPath:
 		hook := service.NewHook(prevFile)
 		if genCode, err = hook.Render(templFP, data); err != nil {
-			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
+			return nil, errors.Wrapf(err, "cannot render hook template: %s", templFP)
 		}
 	case service.MiddlewaresPath:
-		m := service.NewMiddlewares()
-		m.Load(prevFile)
+		m := service.NewMiddlewares(prevFile)
+		// m.Load(prevFile)
 		if genCode, err = m.Render(templFP, data); err != nil {
-			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
+			return nil, errors.Wrapf(err, "cannot render middleware template: %s", templFP)
+		}
+	case service.CmdServerPath:
+		r := service.NewCmdServer(prevFile)
+		if genCode, err = r.Render(templFP, data); err != nil {
+			return nil, errors.Wrapf(err, "cannot render cmd server template: %s", templFP)
 		}
 	case service.CmdClientPath:
 		if data.Config.GenClient {
-			if genCode, err = applyTemplateFromPath(templFP, data); err != nil {
+			r := service.NewCmdClient(prevFile)
+			if genCode, err = r.Render(templFP, data); err != nil {
 				return nil, errors.Wrapf(err, "cannot render cmd client template: %s", templFP)
 			}
 		} else {
 			return nil, ErrGenIgnored
+		}
+	case service.ServerPath:
+		r := service.NewServer(prevFile)
+		if genCode, err = r.Render(templFP, data); err != nil {
+			return nil, errors.Wrapf(err, "cannot render server template: %s", templFP)
 		}
 	default:
 		if genCode, err = applyTemplateFromPath(templFP, data); err != nil {
@@ -148,7 +159,7 @@ func templatePathToActual(templFilePath, svcName string) string {
 	// i.e. for svcName = addsvc; /NAME -> /addsvc-service/addsvc
 	actual := strings.Replace(templFilePath, "NAME", svcName, -1)
 
-	actual = strings.TrimSuffix(actual, "template")
+	actual = strings.TrimSuffix(actual, ".tmpl")
 
 	return actual
 }

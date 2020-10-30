@@ -2,13 +2,10 @@ package service
 
 import (
 	"io"
-	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/teamlint/baron/gengokit"
-	"github.com/teamlint/baron/gengokit/service/templates"
 )
-
-const HookPath = "service/hooks.gotemplate"
 
 // NewHook returns a new HookRender
 func NewHook(prev io.Reader) gengokit.Renderable {
@@ -23,10 +20,12 @@ type HookRender struct {
 
 // Render will return the existing file if it exists, otherwise it will return
 // a brand new copy from the template.
-func (h *HookRender) Render(_ string, _ *gengokit.Data) (io.Reader, error) {
-	if h.prev == nil {
-		return strings.NewReader(templates.Hook), nil
-	} else {
-		return h.prev, nil
+func (r *HookRender) Render(path string, data *gengokit.Data) (io.Reader, error) {
+	if path != HookPath {
+		return nil, errors.Errorf("cannot render unknown file: %q", path)
 	}
+	if r.prev != nil {
+		return r.prev, nil
+	}
+	return data.ApplyTemplateFromPath(path)
 }

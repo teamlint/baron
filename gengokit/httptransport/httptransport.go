@@ -11,10 +11,10 @@ import (
 	"text/template"
 	"unicode"
 
-	gogen "github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -91,11 +91,11 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 			option := Field{
 				Name:           oneofType.Name,
 				QueryParamName: oneofType.PBFieldName,
-				CamelName:      gogen.CamelCase(field.Name),
+				CamelName:      pkg.GoCamelCase(field.Name),
 				LowCamelName:   LowCamelName(oneofType.Name),
 				Repeated:       oneofType.Type.ArrayType,
 				GoType:         oneofType.Type.Name,
-				LocalName:      fmt.Sprintf("%s%s", gogen.CamelCase(oneofType.Name), gogen.CamelCase(meth.Name)),
+				LocalName:      fmt.Sprintf("%s%s", pkg.GoCamelCase(oneofType.Name), pkg.GoCamelCase(meth.Name)),
 			}
 			if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 				option.IsBaseType = true
@@ -104,17 +104,24 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 			// 	option.GoType = "pb." + option.GoType
 			// }
 
-			// Modify GoType to reflect pointer or repeated status
-			if oneofType.Type.StarExpr && oneofType.Type.ArrayType {
-				option.GoType = "[]*" + option.GoType
-			} else if oneofType.Type.ArrayType {
-				option.GoType = "[]" + option.GoType
-			}
+			// GoType 调整为基础类型,不包含 * 符号,* 号 通过 StarExpr 属性判断
+			// 修改为指针类型或切片类型
+			// if oneofType.Type.StarExpr {
+			// 	option.GoType = "*" + option.GoType
+			// if field.Type.ArrayType {
+			// 	option.GoType = "[]" + option.GoType
+			// }
+			// }
 
 			option.IsEnum = oneofType.Type.Enum != nil
 			option.ConvertFunc, option.ConvertFuncNeedsErrorCheck = createDecodeConvertFunc(option)
-			// option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
-			option.TypeConversion = fmt.Sprintf("&%s{%s: %s}", oneofType.Type.Message.Name, gogen.CamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			// option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			typeConvStr := "&%s{%s: %s}"
+			// 如果是指针类型
+			if oneofType.Type.StarExpr {
+				typeConvStr = "%s{%s: %s}"
+			}
+			option.TypeConversion = fmt.Sprintf(typeConvStr, oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
 			option.ZeroValue = getZeroValue(option)
 
 			oneofField.Options = append(oneofField.Options, option)
@@ -132,13 +139,15 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 		newField := Field{
 			Name:           field.Name,
 			QueryParamName: field.PBFieldName,
-			CamelName:      gogen.CamelCase(field.Name),
+			CamelName:      pkg.GoCamelCase(field.Name),
 			LowCamelName:   LowCamelName(field.Name),
 			Location:       param.Location,
 			Repeated:       field.Type.ArrayType,
 			GoType:         field.Type.Name,
-			LocalName:      fmt.Sprintf("%s%s", gogen.CamelCase(field.Name), gogen.CamelCase(meth.Name)),
+			StarExpr:       field.Type.StarExpr,
+			LocalName:      fmt.Sprintf("%s%s", pkg.GoCamelCase(field.Name), pkg.GoCamelCase(meth.Name)),
 		}
+		// log.Debugf("NewBinding field = %+v\n", newField)
 
 		if field.Type.Message == nil && field.Type.Enum == nil && field.Type.Map == nil {
 			newField.IsBaseType = true
@@ -147,12 +156,15 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 		// 	newField.GoType = "pb." + newField.GoType
 		// }
 
-		// Modify GoType to reflect pointer or repeated status
-		if field.Type.StarExpr && field.Type.ArrayType {
-			newField.GoType = "[]*" + newField.GoType
-		} else if field.Type.ArrayType {
-			newField.GoType = "[]" + newField.GoType
-		}
+		// 修改为指针类型或切片类型
+		// GoType 调整为基础类型,不包含 * 符号,* 号 通过 StarExpr 属性判断
+		// if field.Type.StarExpr {
+		// 	newField.GoType = "*" + newField.GoType
+		// 根据 Repeated 判断是否表添加 []
+		// if field.Type.ArrayType {
+		// 	newField.GoType = "[]" + newField.GoType
+		// }
+		// }
 
 		// IsEnum needed for ConvertFunc and TypeConversion logic just below
 		newField.IsEnum = field.Type.Enum != nil
@@ -254,12 +266,12 @@ func (b *Binding) PathSections() []string {
 	for _, part := range parts {
 		if len(part) > 2 && part[0] == '{' && part[len(part)-1] == '}' {
 			name := RemoveBraces(part)
-			if _, ok := isEnum[gogen.CamelCase(name)]; ok {
-				convert := fmt.Sprintf("fmt.Sprintf(\"%%d\", req.%v)", gogen.CamelCase(name))
+			if _, ok := isEnum[pkg.GoCamelCase(name)]; ok {
+				convert := fmt.Sprintf("fmt.Sprintf(\"%%d\", req.%v)", pkg.GoCamelCase(name))
 				rv = append(rv, convert)
 				continue
 			}
-			convert := fmt.Sprintf("fmt.Sprint(req.%v)", gogen.CamelCase(name))
+			convert := fmt.Sprintf("fmt.Sprint(req.%v)", pkg.GoCamelCase(name))
 			rv = append(rv, convert)
 		} else {
 			// Add quotes around things which'll be embeded as string literals,
@@ -347,10 +359,12 @@ case {{$option.LocalName}}OK:
 // convert the string form of the field to it's correct go type.
 func createDecodeConvertFunc(f Field) (string, bool) {
 	needsErrorCheck := true
-	// We may leverage the below convert logic for repeated base types. By
-	// triming the slice prefix we can easily store the template for the
-	// type if needed.
-	goType := strings.TrimPrefix(f.GoType, "[]")
+	// log.Debugf("[createDecodeConvertFunc] field[%v].GoType=%v.IsBaseType=%v, filed.StarExpr=%v\n", f.Name, f.GoType, f.IsBaseType, f.StarExpr)
+	goType := f.GoType
+	// 根据 Repeated 属性设置[]
+	// goType := strings.TrimPrefix(f.GoType, "[]")
+	// 指针类型处理,类型赋值时需要再处理
+	// goType = strings.TrimPrefix(goType, "*")
 	fType := ""
 	switch goType {
 	case "uint32":
@@ -384,8 +398,8 @@ func createDecodeConvertFunc(f Field) (string, bool) {
 		// pointer as well. So we special case args of a single custom message
 		// type so that the variable LocalName is declared as a pointer.
 		singleCustomTypeUnmarshalTmpl := `
-var {{.LocalName}} *{{.GoType}}
-{{.LocalName}} = &{{.GoType}}{}
+var {{.LocalName}} {{if .StarExpr -}}*{{- end -}}{{.GoType}}
+{{.LocalName}} = {{if .StarExpr -}}&{{- end -}}{{.GoType}}{}
 err = json.Unmarshal([]byte({{.LocalName}}Str), {{.LocalName}})`
 
 		errorCheckingTmpl := `
@@ -401,20 +415,21 @@ if err != nil {
 		// surrounded by square brackets. If THAT fails, then the string does
 		// not represent a valid JSON string and an error is returned.
 
-		repeatedFieldType := strings.TrimPrefix(f.GoType, "[]")
+		// repeatedFieldType := strings.TrimPrefix(f.GoType, "[]")
+		repeatedFieldType := f.GoType
 		convertedVar := "converted"
 		switch repeatedFieldType {
 		case "uint32", "int32", "float32":
 			convertedVar = repeatedFieldType + "(converted)"
 		}
 		repeatedUnmarshalTmpl := `
-var {{.LocalName}} {{.GoType}}
+var {{.LocalName}} []{{if .StarExpr -}}*{{- end -}}{{.GoType}}
 {{- if and (.IsBaseType) (not (Contains .GoType "[]byte"))}}
 if len({{.LocalName}}StrArr) > 1 {
 	{{- if (Contains .GoType "[]string")}}
 	{{.LocalName}} = {{.LocalName}}StrArr
 	{{- else}}
-	{{.LocalName}} = make({{.GoType}}, len({{.LocalName}}StrArr))
+	{{.LocalName}} = make([]{{if .StarExpr -}}*{{- end -}}{{.GoType}}, len({{.LocalName}}StrArr))
 	for i, v := range {{.LocalName}}StrArr {
 	` + fmt.Sprintf(fType, "converted", "v") + errorCheckingTmpl + `
 		{{.LocalName}}[i] = ` + convertedVar + `
@@ -446,6 +461,7 @@ if len({{.LocalName}}StrArr) > 1 {
 				jsonConvTmpl = repeatedUnmarshalTmpl + errorCheckingTmpl
 			}
 		}
+		log.Debugf("[UnmarshalNonBaseType] = %v", jsonConvTmpl)
 		code, err := ApplyTemplate("UnmarshalNonBaseType", jsonConvTmpl, f, TemplateFuncs)
 		if err != nil {
 			panic(fmt.Sprintf("Couldn't apply template: %v", err))
@@ -466,6 +482,8 @@ func createDecodeTypeConversion(f Field) string {
 		return f.LocalName
 	}
 	fType := ""
+	// log.Debugf("[gengokit/httptransport/httptransport.go][createDecodeTypeConversion] field=%+v\n", f)
+	// goType := strings.TrimPrefix(f.GoType, "*")
 	switch f.GoType {
 	case "uint32", "int32", "float32":
 		fType = f.GoType + "(%s)"
@@ -475,11 +493,16 @@ func createDecodeTypeConversion(f Field) string {
 	if f.IsEnum {
 		fType = f.GoType + "(%s)"
 	}
+	// 如果字段是标量类型并且是指针类型
+	// log.Debugf("[createDecodeTypeConversion] field[%v].GoType=%v.IsBaseType=%v, filed.StarExpr=%v\n", f.Name, f.GoType, f.IsBaseType, f.StarExpr)
+	if f.IsBaseType && f.StarExpr {
+		return fmt.Sprintf("&"+fType, f.LocalName)
+	}
 	return fmt.Sprintf(fType, f.LocalName)
 }
 
 func getZeroValue(f Field) string {
-	if !f.IsBaseType || f.Repeated {
+	if !f.IsBaseType || f.Repeated || f.StarExpr {
 		return "nil"
 	}
 	switch f.GoType {
@@ -534,7 +557,7 @@ func EnglishNumber(i int) string {
 // LowCamelName returns a CamelCased string, but with the first letter
 // lowercased. "example_name" becomes "exampleName".
 func LowCamelName(s string) string {
-	s = gogen.CamelCase(s)
+	s = pkg.GoCamelCase(s)
 	new := []rune(s)
 	if len(new) < 1 {
 		return s
@@ -551,18 +574,18 @@ var TemplateFuncs = template.FuncMap{
 	"ToLower":  strings.ToLower,
 	"ToUpper":  strings.ToUpper,
 	"Title":    strings.Title,
-	"GoName":   gogen.CamelCase,
+	"GoName":   pkg.GoCamelCase,
 	"Contains": strings.Contains,
 }
 
 // ApplyTemplate applies a template with a given name, executor context, and
 // function map. Returns the output of the template on success, returns an
 // error if template failed to execute.
-func ApplyTemplate(name string, tmpl string, executor interface{}, fncs template.FuncMap) (string, error) {
+func ApplyTemplate(name string, tmpl string, data interface{}, fncs template.FuncMap) (string, error) {
 	codeTemplate := template.Must(template.New(name).Funcs(fncs).Parse(tmpl))
 
 	code := bytes.NewBuffer(nil)
-	err := codeTemplate.Execute(code, executor)
+	err := codeTemplate.Execute(code, data)
 	if err != nil {
 		return "", errors.Wrapf(err, "attempting to execute template %q", name)
 	}

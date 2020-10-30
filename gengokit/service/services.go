@@ -15,16 +15,13 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/teamlint/baron/gengokit"
-	"github.com/teamlint/baron/gengokit/service/templates"
+	"github.com/teamlint/baron/gengokit/template"
 	"github.com/teamlint/baron/svcdef"
 )
 
 // NewService is an exported func that creates a new service
 // it will not be defined in the service definition but is required
 const ignoredFunc = "NewService"
-
-// ServicePath is the relative path to the service template file
-const ServicePath = "service/service.gotemplate"
 
 // NewService returns a baron.Renderable capable of updating service.
 // New should be passed the previous version of the service to parse.
@@ -78,7 +75,7 @@ func (h *handler) Render(alias string, data *gengokit.Data) (io.Reader, error) {
 		return nil, errors.Errorf("cannot render unknown file: %q", alias)
 	}
 	if h.ast == nil {
-		return applyServerTempl(data)
+		return applyServiceTempl(data)
 	}
 
 	// Remove exported methods not defined in service definition
@@ -113,7 +110,7 @@ func (h *handler) Render(alias string, data *gengokit.Data) (io.Reader, error) {
 	}
 
 	// render the server for all methods not already defined
-	newCode, err := applyServerMethsTempl(ex)
+	newCode, err := applyServiceMethodsTempl(ex)
 
 	if err != nil {
 		return nil, err
@@ -285,11 +282,12 @@ func exprString(e ast.Expr) string {
 	return ""
 }
 
-func applyServerTempl(exec *gengokit.Data) (io.Reader, error) {
+func applyServiceTempl(exec *gengokit.Data) (io.Reader, error) {
 	log.Debug("Rendering handler for the first time")
-	return exec.ApplyTemplate(templates.Services, "ServerTempl")
+	return exec.ApplyTemplate(template.MustAssetString(ServicePath), "ServiceTmpl")
 }
 
-func applyServerMethsTempl(exec handlerData) (io.Reader, error) {
-	return gengokit.ApplyTemplate(templates.ServiceMethods, "ServerMethsTempl", exec, gengokit.FuncMap)
+func applyServiceMethodsTempl(data handlerData) (io.Reader, error) {
+	log.Debugf("[applyServiceMethodsTempl] data = %+v, type=%T", data, data)
+	return gengokit.ApplyTemplate(template.MustAssetString(ServiceMethodsPath), "ServiceMethodsTmpl", data, gengokit.FuncMap)
 }

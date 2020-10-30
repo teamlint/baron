@@ -68,7 +68,7 @@ tasks:
     desc: 'baron gen example service'
     dir: './_example'
     cmds: 
-      - baron -v --client --svcout=./ ./api/echo/echo.proto
+      - baron -v --svcout=./ ./api/echo/echo.proto
     silent: false
 
   gen-example-grpc:
@@ -132,4 +132,16 @@ tasks:
     dir: ./_example/start-service/cmd/start-client
     cmds:
       - go run main.go 
+    silent: false
+
+  test:
+    desc: 'baron test generator'
+    dir: ./_example
+    cmds: 
+      - rm -rf ./start/start.pb.go
+      - rm -rf ./start/start_grpc.pb.go
+      - rm -rf ./start/start.pb.baron.go
+      - task: install
+      - task: gen-start
+      - task: run-start
     silent: false

@@ -6,10 +6,11 @@ import (
 	"strings"
 	"text/template"
 
-	generatego "github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"github.com/pkg/errors"
 
 	"github.com/teamlint/baron/gengokit/httptransport"
+	templFiles "github.com/teamlint/baron/gengokit/template"
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -36,7 +37,7 @@ var FuncMap = template.FuncMap{
 	"ToLower":  strings.ToLower,
 	"ToUpper":  strings.ToUpper,
 	"Title":    strings.Title,
-	"GoName":   generatego.CamelCase,
+	"GoName":   pkg.GoCamelCase,
 	"Contains": strings.Contains,
 }
 
@@ -74,6 +75,16 @@ func NewData(sd *svcdef.Svcdef, conf Config) (*Data, error) {
 		VersionDate:  conf.VersionDate,
 		Config:       conf,
 	}, nil
+}
+
+// ApplyTemplateFromPath 使用模板路径执行模板呈现
+func (e *Data) ApplyTemplateFromPath(templFP string) (io.Reader, error) {
+	tmplContent, err := templFiles.AssetString(templFP)
+	if err != nil {
+		return nil, errors.Wrapf(err, "unable to find template file: %v", templFP)
+	}
+
+	return e.ApplyTemplate(tmplContent, templFP)
 }
 
 // ApplyTemplate applies the passed template with the Data

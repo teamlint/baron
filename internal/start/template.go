@@ -5,7 +5,7 @@ syntax = "proto3";
 
 package {{.PackageName}};
 
-import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
+import "google/api/annotations.proto";
 
 service {{.ServiceName}} {
   rpc Status(StatusRequest) returns (StatusResponse) {
