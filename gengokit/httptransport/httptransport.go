@@ -104,18 +104,24 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 			// 	option.GoType = "pb." + option.GoType
 			// }
 
+			// GoType 调整为基础类型,不包含 * 符号,* 号 通过 StarExpr 属性判断
 			// 修改为指针类型或切片类型
-			if oneofType.Type.StarExpr {
-				option.GoType = "*" + option.GoType
-				if field.Type.ArrayType {
-					option.GoType = "[]" + option.GoType
-				}
-			}
+			// if oneofType.Type.StarExpr {
+			// 	option.GoType = "*" + option.GoType
+			// if field.Type.ArrayType {
+			// 	option.GoType = "[]" + option.GoType
+			// }
+			// }
 
 			option.IsEnum = oneofType.Type.Enum != nil
 			option.ConvertFunc, option.ConvertFuncNeedsErrorCheck = createDecodeConvertFunc(option)
 			// option.TypeConversion = fmt.Sprintf("&pb.%s{%s: %s}", oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
-			option.TypeConversion = fmt.Sprintf("&%s{%s: %s}", oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
+			typeConvStr := "&%s{%s: %s}"
+			// 如果是指针类型
+			if oneofType.Type.StarExpr {
+				typeConvStr = "%s{%s: %s}"
+			}
+			option.TypeConversion = fmt.Sprintf(typeConvStr, oneofType.Type.Message.Name, pkg.GoCamelCase(oneofType.Name), createDecodeTypeConversion(option))
 			option.ZeroValue = getZeroValue(option)
 
 			oneofField.Options = append(oneofField.Options, option)
@@ -151,12 +157,14 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 		// }
 
 		// 修改为指针类型或切片类型
-		if field.Type.StarExpr {
-			newField.GoType = "*" + newField.GoType
-			if field.Type.ArrayType {
-				newField.GoType = "[]" + newField.GoType
-			}
-		}
+		// GoType 调整为基础类型,不包含 * 符号,* 号 通过 StarExpr 属性判断
+		// if field.Type.StarExpr {
+		// 	newField.GoType = "*" + newField.GoType
+		// 根据 Repeated 判断是否表添加 []
+		// if field.Type.ArrayType {
+		// 	newField.GoType = "[]" + newField.GoType
+		// }
+		// }
 
 		// IsEnum needed for ConvertFunc and TypeConversion logic just below
 		newField.IsEnum = field.Type.Enum != nil
@@ -351,12 +359,12 @@ case {{$option.LocalName}}OK:
 // convert the string form of the field to it's correct go type.
 func createDecodeConvertFunc(f Field) (string, bool) {
 	needsErrorCheck := true
-	// We may leverage the below convert logic for repeated base types. By
-	// triming the slice prefix we can easily store the template for the
-	// type if needed.
-	goType := strings.TrimPrefix(f.GoType, "[]")
+	// log.Debugf("[createDecodeConvertFunc] field[%v].GoType=%v.IsBaseType=%v, filed.StarExpr=%v\n", f.Name, f.GoType, f.IsBaseType, f.StarExpr)
+	goType := f.GoType
+	// 根据 Repeated 属性设置[]
+	// goType := strings.TrimPrefix(f.GoType, "[]")
 	// 指针类型处理,类型赋值时需要再处理
-	goType = strings.TrimPrefix(goType, "*")
+	// goType = strings.TrimPrefix(goType, "*")
 	fType := ""
 	switch goType {
 	case "uint32":
@@ -390,8 +398,8 @@ func createDecodeConvertFunc(f Field) (string, bool) {
 		// pointer as well. So we special case args of a single custom message
 		// type so that the variable LocalName is declared as a pointer.
 		singleCustomTypeUnmarshalTmpl := `
-var {{.LocalName}} *{{.GoType}}
-{{.LocalName}} = &{{.GoType}}{}
+var {{.LocalName}} {{if .StarExpr -}}*{{- end -}}{{.GoType}}
+{{.LocalName}} = {{if .StarExpr -}}&{{- end -}}{{.GoType}}{}
 err = json.Unmarshal([]byte({{.LocalName}}Str), {{.LocalName}})`
 
 		errorCheckingTmpl := `
@@ -407,20 +415,21 @@ if err != nil {
 		// surrounded by square brackets. If THAT fails, then the string does
 		// not represent a valid JSON string and an error is returned.
 
-		repeatedFieldType := strings.TrimPrefix(f.GoType, "[]")
+		// repeatedFieldType := strings.TrimPrefix(f.GoType, "[]")
+		repeatedFieldType := f.GoType
 		convertedVar := "converted"
 		switch repeatedFieldType {
 		case "uint32", "int32", "float32":
 			convertedVar = repeatedFieldType + "(converted)"
 		}
 		repeatedUnmarshalTmpl := `
-var {{.LocalName}} {{.GoType}}
+var {{.LocalName}} []{{if .StarExpr -}}*{{- end -}}{{.GoType}}
 {{- if and (.IsBaseType) (not (Contains .GoType "[]byte"))}}
 if len({{.LocalName}}StrArr) > 1 {
 	{{- if (Contains .GoType "[]string")}}
 	{{.LocalName}} = {{.LocalName}}StrArr
 	{{- else}}
-	{{.LocalName}} = make({{.GoType}}, len({{.LocalName}}StrArr))
+	{{.LocalName}} = make([]{{if .StarExpr -}}*{{- end -}}{{.GoType}}, len({{.LocalName}}StrArr))
 	for i, v := range {{.LocalName}}StrArr {
 	` + fmt.Sprintf(fType, "converted", "v") + errorCheckingTmpl + `
 		{{.LocalName}}[i] = ` + convertedVar + `
@@ -452,6 +461,7 @@ if len({{.LocalName}}StrArr) > 1 {
 				jsonConvTmpl = repeatedUnmarshalTmpl + errorCheckingTmpl
 			}
 		}
+		log.Debugf("[UnmarshalNonBaseType] = %v", jsonConvTmpl)
 		code, err := ApplyTemplate("UnmarshalNonBaseType", jsonConvTmpl, f, TemplateFuncs)
 		if err != nil {
 			panic(fmt.Sprintf("Couldn't apply template: %v", err))
@@ -472,9 +482,9 @@ func createDecodeTypeConversion(f Field) string {
 		return f.LocalName
 	}
 	fType := ""
-	// log.Debugf("[gengokit/httptransport/httptransport.go][createDecodeTypeConversion] filed=%+v\n", f)
-	goType := strings.TrimPrefix(f.GoType, "*")
-	switch goType {
+	// log.Debugf("[gengokit/httptransport/httptransport.go][createDecodeTypeConversion] field=%+v\n", f)
+	// goType := strings.TrimPrefix(f.GoType, "*")
+	switch f.GoType {
 	case "uint32", "int32", "float32":
 		fType = f.GoType + "(%s)"
 	default:
@@ -483,15 +493,16 @@ func createDecodeTypeConversion(f Field) string {
 	if f.IsEnum {
 		fType = f.GoType + "(%s)"
 	}
-	// 如果字段是指针类型
-	if f.StarExpr {
+	// 如果字段是标量类型并且是指针类型
+	// log.Debugf("[createDecodeTypeConversion] field[%v].GoType=%v.IsBaseType=%v, filed.StarExpr=%v\n", f.Name, f.GoType, f.IsBaseType, f.StarExpr)
+	if f.IsBaseType && f.StarExpr {
 		return fmt.Sprintf("&"+fType, f.LocalName)
 	}
 	return fmt.Sprintf(fType, f.LocalName)
 }
 
 func getZeroValue(f Field) string {
-	if !f.IsBaseType || f.Repeated {
+	if !f.IsBaseType || f.Repeated || f.StarExpr {
 		return "nil"
 	}
 	switch f.GoType {

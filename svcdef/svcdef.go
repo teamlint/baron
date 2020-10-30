@@ -570,9 +570,11 @@ func NewField(f *ast.Field) (*Field, error) {
 	if err != nil {
 		return nil, err
 	}
-	// isBaseType grpc 标量类型
-	isBaseType := rv.Type.Enum == nil && rv.Type.Map == nil
+	// isBaseType grpc 标量类型, 此处不能严格判断是否为基础类型, Type.Message还没有赋值
+	isBaseType := rv.Type.Message == nil && rv.Type.Enum == nil && rv.Type.Map == nil
 	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Type=%+v,IsBaseType=%v,StarExpr=%v,Repeated=%v\n",
 		rv.Name, rv.Type.Name, isBaseType, rv.Type.StarExpr, rv.Type.ArrayType)
+	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Message=%v,Enum=%v,Map=%v,Repeated=%v\n",
+		rv.Name, rv.Type.Message, rv.Type.Enum, rv.Type.Map, rv.Type.ArrayType)
 	return rv, nil
 }

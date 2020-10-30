@@ -410,15 +410,10 @@ func (h httpError) Headers() http.Header {
 			return nil, errors.Wrapf(err, "cannot read body of http request")
 		}
 		if len(buf) > 0 {
-			// AllowUnknownFields stops the unmarshaler from failing if the JSON contains unknown fields.
-			// unmarshaller := jsonpb.Unmarshaler{
-			// 	AllowUnknownFields: true,
-			// }
 			unmarshaller := protojson.UnmarshalOptions{
 				AllowPartial:   true,
 				DiscardUnknown: true,
 			}
-			// if err = unmarshaller.Unmarshal(bytes.NewBuffer(buf), &req); err != nil {
 			if err = unmarshaller.Unmarshal(buf, &req); err != nil {
 				const size = 8196
 				if len(buf) > size {
@@ -464,7 +459,7 @@ func EncodeHTTPGenericResponse(_ context.Context, w http.ResponseWriter, respons
 	// return marshaller.Marshal(w, response.(proto.Message))
 	marshaller := protojson.MarshalOptions{
 		AllowPartial:    true,
-		UseProtoNames:   false,
+		UseProtoNames:   true,
 		UseEnumNumbers:  true,
 		EmitUnpopulated: true,
 	}
@@ -587,10 +582,11 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 		}
 
 		var resp {{GoName $method.ResponseType}}
-		// if err = jsonpb.UnmarshalString(string(buf), &resp); err != nil {
-		// 	return nil, errorDecoder(buf)
-		// }
-		if err = protojson.Unmarshal(buf, &resp); err != nil {
+		unmarshaller := protojson.UnmarshalOptions{
+			AllowPartial:   true,
+			DiscardUnknown: true,
+		}
+		if err = unmarshaller.Unmarshal(buf, &resp); err != nil {
 			return nil, errorDecoder(buf)
 		}
 

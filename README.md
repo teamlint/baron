@@ -28,14 +28,7 @@ $ go get -u google.golang.org/grpc
 ```
 go get -u -d github.com/teamlint/baron
 cd $GOPATH/src/github.com/teamlint/baron
-make dependencies
-make
-```
-Windows 操作系统使用下面安装方式:
-```
-go get -u -d github.com/teamlint/baron
-cd %GOPATH%/src/github.com/teamlint/baron
-wininstall.bat
+task install
 ```
 
 ## 使用
@@ -64,21 +57,7 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
-枚举值为空且Map值为空,即为BaseType,表示
-```go
-// Indicates whether this field represents a basic protobuf type such as
-// one of the ints, floats, strings, bools, etc. Since we can only create
-// automatic marshaling of base types, if this is false a warning is given
-// to the user.
-
-if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
-    option.IsBaseType = true
-}
-
-```
-
 ## TODO
-- 支持标量切片类型
 - server 增加初始化方法
 
 ## 参考
@@ -89,4 +68,5 @@ if oneofType.Type.Enum == nil && oneofType.Type.Map == nil {
 - https://github.com/grpc-ecosystem/grpc-gateway/blob/4ba7ec0bc390cae4a2d03625ac122aa8a772ac3a/protoc-gen-grpc-gateway/httprule/parse.go
 
 ## 问题
-- 不支持结构体类型转化为非指针类型
+- 使用 "google/protobuf/wrappers.proto" 包含的StringValue类似标量包装类型时, 使用自动生成的HTTP代码客户端解析出错
+
