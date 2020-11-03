@@ -47,6 +47,7 @@ func (s *echoService) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoRes
 		result += "|" + fmt.Sprint(*in.Debug)
 		log.Printf("[Echo] EchoRequest.Optional.Bool=%+v\n", *in.Debug)
 	}
+	resp.CreatedAt = in.CreatedAt
 	resp.Out = result
 	return &resp, nil
 }

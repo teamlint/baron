@@ -11,6 +11,7 @@ import (
 
 	"golang.org/x/tools/go/packages"
 
+	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	flag "github.com/spf13/pflag"
@@ -39,6 +40,7 @@ var (
 	versionFlag    = flag.BoolP("version", "V", false, "Print version")
 	clientFlag     = flag.BoolP("client", "c", false, "Generate NAME-service client")
 	transportFlag  = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|nats]")
+	svcdefFlag     = flag.BoolP("svcdef", "d", false, "Print service definition")
 )
 
 var binName = filepath.Base(os.Args[0])
@@ -160,6 +162,7 @@ func parseInput() (*config.Config, error) {
 	cfg := config.Config{
 		GenClient: *clientFlag,
 		Transport: *transportFlag,
+		Svcdef:    *svcdefFlag,
 	}
 
 	// GOPATH
@@ -268,8 +271,7 @@ func parseSVCOut(svcOut string, GOPATH string) (string, error) {
 	return filepath.Join(GOPATH, "src", svcOut), nil
 }
 
-// parseServiceDefinition returns a svcdef which contains all necessary
-// information for generating a baron service.
+// parseServiceDefinition 返回Svcdef, 包含所有服务必要的信息
 func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 	protoDefPaths := cfg.DefPaths
 	// Create the ServicePath so the .pb.go files may be place within it
@@ -306,6 +308,10 @@ func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 	sd, err := svcdef.New(pbgoFiles, pbFiles)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to create service definition; did you pass ALL the protobuf files to baron?")
+	}
+	// 是否打印服务定义
+	if cfg.Svcdef {
+		fmt.Printf("%# v", pretty.Formatter(sd))
 	}
 
 	return sd, nil

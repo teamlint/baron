@@ -2,8 +2,16 @@ syntax = "proto3";
 
 package echo;
 
-import "google/protobuf/timestamp.proto";
+option go_package=".;echo";
+
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
 
 service Echo {
   // Echo "echos" the incoming string
@@ -44,12 +52,26 @@ service Echo {
   }
 }
 
+message Msg {
+  int32 code=1;
+  string msg=2;
+}
+
 message EchoRequest {
-  string in              = 1;
-  optional int64 at      = 2;
-  optional string desc   = 3;
-  optional bool debug    = 4;
-  /* repeated string others = 5; */
+  string in                             = 1;
+  optional int64 at                     = 2;
+  optional string desc                  = 3;
+  optional bool debug                   = 4;
+  repeated string others                = 5;
+  google.protobuf.StringValue json_str  = 6;
+  google.protobuf.Int64Value json_int64 = 7;
+  Msg message                           = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Any any_data = 11;
+  /* google.protobuf.Struct struct_data = 12; */
+  google.protobuf.Empty empty_data = 13;
+  google.protobuf.Duration duration_data = 14;
+  google.protobuf.FieldMask mask_data = 15;
 }
 
 message LouderRequest {

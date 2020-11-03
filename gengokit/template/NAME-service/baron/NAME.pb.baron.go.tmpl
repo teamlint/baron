@@ -23,11 +23,19 @@ import (
 	"strings"
 
 	"github.com/go-kit/kit/endpoint"
+	any "google.golang.org/protobuf/types/known/anypb"
+	duration "google.golang.org/protobuf/types/known/durationpb"
+	empty "google.golang.org/protobuf/types/known/emptypb"
+	_struct "google.golang.org/protobuf/types/known/structpb"
+	timestamp "google.golang.org/protobuf/types/known/timestamppb"
+	wrappers "google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
+	field_mask "google.golang.org/protobuf/types/known/fieldmaskpb"
+
 	{{- if eq .Config.Transport "all" "nats" }}
 	"github.com/nats-io/nats.go"
 	{{- end}}
@@ -53,6 +61,14 @@ var (
 	_ = ioutil.NopCloser
 	_ = io.Copy
 	_ = errors.Wrap
+	// google.protobuf types
+	_ any.Any
+	_ duration.Duration
+	_ empty.Empty
+	_ _struct.Struct
+	_ timestamp.Timestamp
+	_ wrappers.StringValue
+	_ field_mask.FieldMask
 )
 
 /************************************** Endpoints ******************************************/

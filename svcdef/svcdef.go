@@ -198,8 +198,7 @@ var (
 	oneofs = map[string][]*Field{}
 )
 
-// New creates a Svcdef by parsing the provided Go and Protobuf source files to
-// derive type information, gRPC service data, and HTTP annotations.
+// New 解析 pb.go 和 go-grpc.pb.go 文件, 创建 Svcdef 服务定义相关信息和 HTTP 绑定相关信息
 func New(goFiles map[string]io.Reader, protoFiles map[string]io.Reader) (*Svcdef, error) {
 	rv := Svcdef{}
 
@@ -541,40 +540,48 @@ func NewField(f *ast.Field) (*Field, error) {
 		}
 
 		switch ex := e.(type) {
-		case *ast.Ident:
+		case *ast.Ident: // 函数名/变量名
 			rv.Type.Name += ex.Name
 			if oneof, ok := oneofs[ex.Name]; ok {
 				rv.Type.Oneof = oneof
 			}
-		case *ast.StarExpr:
+		case *ast.StarExpr: // 指针表达式
 			rv.Type.StarExpr = true
 			typeFollower(ex.X)
-		case *ast.ArrayType:
+		case *ast.ArrayType: // 数组类型
 			// Handle multi-nested slices, such as repeated bytes, which maps to [][]byte
 			if rv.Type.ArrayType {
 				rv.Type.Name = "[]" + rv.Type.Name
 			}
 			rv.Type.ArrayType = true
 			typeFollower(ex.Elt)
-		case *ast.MapType:
+		case *ast.MapType: // 字典类型
 			mp, err := NewMap(ex)
 			if err != nil {
 				return errors.Wrapf(err, "failed to create map for field %q", rv.Name)
 			}
 			rv.Type.Map = mp
+		case *ast.SelectorExpr: // 选择结构, 类似于a.b的结构
+			var tname string
+			if xnode, ok := ex.X.(*ast.Ident); ok {
+				tname += xnode.Name + "."
+			}
+			tname += ex.Sel.Name
+			rv.Type.Name += tname
 		}
 		return nil
 	}
-	log.Debugf("[svcdef/svcdef.go][NewField] origin field[%v].type=%+v\n", f.Names[0].Name, f.Type)
+	// log.Debugf("[svcdef/svcdef.go][NewField] origin field[%v].type=%+v\n", f.Names[0].Name, f.Type)
+	// fmt.Printf("[typeFollower] %# v", pretty.Formatter(f.Type))
 	err := typeFollower(f.Type)
 	if err != nil {
 		return nil, err
 	}
 	// isBaseType grpc 标量类型, 此处不能严格判断是否为基础类型, Type.Message还没有赋值
-	isBaseType := rv.Type.Message == nil && rv.Type.Enum == nil && rv.Type.Map == nil
-	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Type=%+v,IsBaseType=%v,StarExpr=%v,Repeated=%v\n",
-		rv.Name, rv.Type.Name, isBaseType, rv.Type.StarExpr, rv.Type.ArrayType)
-	log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Message=%v,Enum=%v,Map=%v,Repeated=%v\n",
-		rv.Name, rv.Type.Message, rv.Type.Enum, rv.Type.Map, rv.Type.ArrayType)
+	// isBaseType := rv.Type.Message == nil && rv.Type.Enum == nil && rv.Type.Map == nil
+	// log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Type=%+v,IsBaseType=%v,StarExpr=%v,Repeated=%v\n",
+	// rv.Name, rv.Type.Name, isBaseType, rv.Type.StarExpr, rv.Type.ArrayType)
+	// log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Message=%v,Enum=%v,Map=%v,Repeated=%v\n",
+	// rv.Name, rv.Type.Message, rv.Type.Enum, rv.Type.Map, rv.Type.ArrayType)
 	return rv, nil
 }

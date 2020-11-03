@@ -11,6 +11,7 @@ require (
 	github.com/nats-io/nats.go v1.9.1
 	github.com/pkg/errors v0.9.1
 	github.com/rs/xid v1.2.1
+	github.com/teamlint/baron v0.2.4
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 	golang.org/x/sys v0.0.0-20201020230747-6e5568b54d1a // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
@@ -20,4 +21,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-replace github.com/teamlint/baron v0.2.3 => ../
+replace github.com/teamlint/baron v0.2.4 => ../

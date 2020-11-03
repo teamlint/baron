@@ -33,23 +33,47 @@ task install
 
 ## 使用
 
-Using baron is easy. You define your service with [gRPC](http://www.grpc.io/)
-and [protoc buffers](https://developers.google.com/protocol-buffers/docs/proto3),
-and baron uses that definition to create an entire service. You can even
-add [http annotations](
-https://github.com/googleapis/googleapis/blob/928a151b2f871b4239b7707e1bb59258df3fe10a/google/api/http.proto#L36)
-for HTTP 1.1/JSON transport!
+使用 [proto3](https://developers.google.com/protocol-buffers/docs/proto3) 定义服务 {NAME}.proto
+使用 baron 生成基础框架代码 
+baron {NAME}.proto
+打开 `service/service.go`, 编写业务逻辑处理
+启动服务端
+```shell
+$ go run {NAME}-service/cmd/{NAME}/main.go
+```
+客户端使用
+添加引用包 
+```go
+import pb "{{MODULE}}/{NAME}"
+```
+调用服务
+```go
+conn, err := grpc.Dial(
+    grpcAddr,
+    grpc.WithInsecure(),
+    grpc.WithBlock(),
+)
+if err != nil {
+    log.Fatal(err)
+}
+defer conn.Close()
+baronGRPCClient, err := pb.NewGRPCClient(conn)
+if err != nil {
+    log.Fatal(err)
+}
 
-Then you open the `service/service.go`,
-add you business logic, and you're good to go.
-
-Here is an example service definition: [Echo Service](./_example/echo.proto)
-
-Try baron for yourself on Echo Service to see the service that is generated:
+ctx := context.Background()
+var in pb.EchoRequest
+in.In = "hello"
+out, err := baronGRPCClient.Echo(ctx, &in)
+if err != nil {
+    log.Fatalf("[Baron.GRPCClient] Echo.Echo err=%v\n", err)
+}
+log.Printf("[Baron.GRPCClient] Echo.Echo result=%+v\n", *out)
 
 ```
-baron _example/echo.proto
-```
+
+
 
 See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more details.
 
@@ -68,5 +92,5 @@ See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 - https://github.com/grpc-ecosystem/grpc-gateway/blob/4ba7ec0bc390cae4a2d03625ac122aa8a772ac3a/protoc-gen-grpc-gateway/httprule/parse.go
 
 ## 问题
-- 使用 "google/protobuf/wrappers.proto" 包含的StringValue类似标量包装类型时, 使用自动生成的HTTP代码客户端解析出错
+- 暂不支持 `google/protobuf/struct.proto`
 

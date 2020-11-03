@@ -9,7 +9,12 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/rs/xid"
 
+	// timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/teamlint/baron/_example/api/echo"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
+
+	// "github.com/teamlint/baron/protobuf/types/known/timestamppb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 
 	"google.golang.org/grpc"
 )
@@ -53,6 +58,7 @@ func main() {
 		in.In = "grpc->" + xid.New().String()
 		now := time.Now().Unix()
 		in.At = &now
+		in.CreatedAt = timestamppb.Now()
 		out, err := baronGRPCClient.Echo(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.GRPCClient] Echo.Echo err=%v\n", err)
@@ -98,6 +104,8 @@ func main() {
 		in.At = &now
 		desc := "HTTP测试可选字段"
 		in.Desc = &desc
+		in.CreatedAt = timestamppb.Now()
+		in.JsonStr = wrapperspb.String("wrappers字段")
 		baronHTTPClient, err := pb.NewHTTPClient(httpAddr)
 		if err != nil {
 			log.Fatal(err)
@@ -162,6 +170,7 @@ func main() {
 		in.In = "nats->" + xid.New().String()
 		now := time.Now().Unix()
 		in.At = &now
+		in.CreatedAt = timestamppb.Now()
 		out, err := baronNATSClient.Echo(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.NATSClient] Echo.Echo err=%v\n", err)
