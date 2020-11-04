@@ -11,6 +11,8 @@ import (
 
 	// timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/teamlint/baron/_example/api/echo"
+	"google.golang.org/protobuf/proto"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 	// "github.com/teamlint/baron/protobuf/types/known/timestamppb"
@@ -100,12 +102,18 @@ func main() {
 		ctx := context.Background()
 		var in pb.EchoRequest
 		in.In = "http->" + xid.New().String()
-		now := time.Now().Unix()
-		in.At = &now
-		desc := "HTTP测试可选字段"
-		in.Desc = &desc
+		in.At = proto.Int64(time.Now().Unix())
+		in.Desc = proto.String("HTTP测试可选字段")
 		in.CreatedAt = timestamppb.Now()
-		in.JsonStr = wrapperspb.String("wrappers字段")
+		// in.JsonStr = wrapperspb.String("wrappers字段")
+		in.JsonInt64 = wrapperspb.Int64(65535)
+		sd := structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"k1": structpb.NewStringValue("struct字段值"),
+			},
+		}
+		in.StructData = &sd
+
 		baronHTTPClient, err := pb.NewHTTPClient(httpAddr)
 		if err != nil {
 			log.Fatal(err)

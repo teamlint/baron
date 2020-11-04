@@ -68,7 +68,7 @@ tasks:
     desc: 'baron gen example service'
     dir: './_example'
     cmds: 
-      - baron -v -d --svcout=./ ./api/echo/echo.proto
+      - baron -v --svcout=./ ./api/echo/echo.proto
     silent: false
 
   gen-example-grpc:

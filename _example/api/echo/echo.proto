@@ -18,12 +18,12 @@ service Echo {
   rpc Echo (EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
       // All fields (In) are query parameters of the http request unless otherwise specified
-      get: "/echo"
+      post: "/echo"
 
-      additional_bindings {
-        // Trailing slashes are different routes
-        get: "/echo/"
-      }
+      /* additional_bindings { */
+      /*   // Trailing slashes are different routes */
+      /*   get: "/echo" */
+      /* } */
     };
   }
 
@@ -68,7 +68,7 @@ message EchoRequest {
   Msg message                           = 9;
   google.protobuf.Timestamp created_at = 10;
   google.protobuf.Any any_data = 11;
-  /* google.protobuf.Struct struct_data = 12; */
+  google.protobuf.Struct struct_data = 12;
   google.protobuf.Empty empty_data = 13;
   google.protobuf.Duration duration_data = 14;
   google.protobuf.FieldMask mask_data = 15;

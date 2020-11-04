@@ -82,6 +82,8 @@ See [USAGE.md](./docs/USAGE.md) and [TUTORIAL.md](./docs/TUTORIAL.md) for more d
 See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 
 ## TODO
+- json 编码器需要同时支持普通对象和复杂对象(wrapper.proto), query 查询解码可以去掉复杂类型,使用自定义库
+- stream 测试
 - server 增加初始化方法
 
 ## 参考
@@ -91,6 +93,25 @@ See [DEVELOPING.md](./docs/DEVELOPING.md) for details.
 - https://github.com/nametake/protoc-gen-gohttp protoc plugin to generate to Go's net/http converter
 - https://github.com/grpc-ecosystem/grpc-gateway/blob/4ba7ec0bc390cae4a2d03625ac122aa8a772ac3a/protoc-gen-grpc-gateway/httprule/parse.go
 
-## 问题
-- 暂不支持 `google/protobuf/struct.proto`
+## 注意事项
+- HTTP 服务请求支持如果使用查询字符串传递复杂数据类型, 需要将字段值编码为JSON并做URL编码
+  例:
+  ```proto
+    message EchoRequest {
+      google.protobuf.StringValue json_str  = 6;
+    }
+  ```
+  使用 URL 查询参数传值
+  ```
+  http://localhost:5050/echo?json_str=%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D
+  ```
+  参数值:
+  参数 JSON 序列化
+  `{"value":"Hello世界"}`
+  URL 编码
+  `%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D`
+
+## 已知问题
+- HTTP 服务请求查询字符串(url query) 仅支持标量类型, 请求体(http body)无限制 
+- `google/protobuf/struct.proto` 生成的字段必须设置值,设置 nil 报错
 

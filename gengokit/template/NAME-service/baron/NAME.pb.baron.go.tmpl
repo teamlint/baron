@@ -467,12 +467,6 @@ func (h httpError) Headers() http.Header {
 // EncodeHTTPGenericResponse is a transport/http.EncodeResponseFunc that encodes
 // the response as JSON to the response writer. Primarily useful in a server.
 func EncodeHTTPGenericResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	// marshaller := jsonpb.Marshaler{
-	// 	EmitDefaults: true,
-	// 	OrigName: true,
-	// 	EnumsAsInts:  true,
-	// }
-	// return marshaller.Marshal(w, response.(proto.Message))
 	marshaller := protojson.MarshalOptions{
 		AllowPartial:    true,
 		UseProtoNames:   true,
@@ -612,7 +606,7 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 
 // HTTP Client Encode
 {{range $method := .HTTPHelper.Methods}}
-	{{- range $binding := $method.Bindings -}}
+	{{range $binding := $method.Bindings -}}
 	// EncodeHTTP{{$binding.Label}}Request is a transport/http.EncodeRequestFunc
 	// that encodes a {{ToLower $binding.Parent.Name}} request into the various portions of
 	// the http request (path, query, and body).
@@ -705,16 +699,21 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 				toRet.{{$field.CamelName}} = req.{{$field.CamelName}}
 			{{end}}
 		{{- end }}
-		encoder := json.NewEncoder(&buf)
-		encoder.SetEscapeHTML(false)
-		if err := encoder.Encode(toRet); err != nil {
+		marshaler := protojson.MarshalOptions{
+			AllowPartial:    true,
+			UseProtoNames:   true,
+			UseEnumNumbers:  true,
+			EmitUnpopulated: true,
+		}
+		data, err := marshaler.Marshal(req)
+		if err != nil {
 			return errors.Wrapf(err, "couldn't encode body as json %v", toRet)
 		}
-		r.Body = ioutil.NopCloser(&buf)
+		r.Body = ioutil.NopCloser(bytes.NewBuffer(data))
 		{{- end }}
 		return nil
 	}
-	{{- end -}}
+	{{- end}}
 {{end}}
 {{if eq .Config.Transport "all" "nats" }}
 /************************************** NATSServer ******************************************/
