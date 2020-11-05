@@ -256,31 +256,32 @@ if err != nil {
 ## 注意事项
 - HTTP 服务请求如果使用查询字符串传递复杂数据类型, 需要将字段值编码为JSON并做URL编码, 使用请求体传值可直接使用**原始值**
 
-	**服务定义**
-  
-  ```protobuf
-  message EchoRequest {
-  	google.protobuf.StringValue json_str  = 6;
-  }
+**服务定义**
+
+```protobuf
+message EchoRequest {
+	google.protobuf.StringValue json_str  = 6;
+}
 ```
-  
-  **使用 URL 查询参数传值**
-  
-  - 将参数 JSON 序列化
-  `{"value":"Hello世界"}`
-  
-  - URL 编码
-    `%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D`
-    ```http
-    http://localhost:5050/echo?json_str=%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D
-    ```
-  
+
+**使用 URL 查询参数传值**
+
+- 将参数 JSON 序列化
+`{"value":"Hello世界"}`
+
+- URL 编码
+  `%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D`
+
+```http
+http://localhost:5050/echo?json_str=%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D
+```
+
   **使用 HTTP Body 传值**
-  
+
   ```json
-  {
-  	"json_str": "Hello世界"
-  }
+{
+  "json_str": "Hello世界"
+}
   ```
 
 
