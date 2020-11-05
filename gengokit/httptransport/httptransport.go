@@ -61,11 +61,7 @@ func NewMethod(meth *svcdef.ServiceMethod) *Method {
 	return &nMeth
 }
 
-// NewBinding creates a Binding struct based on a svcdef.HTTPBinding. Because
-// NewBinding requires access to some of it's parent method's fields, instead
-// of passing a svcdef.HttpBinding directly, you instead pass a
-// svcdef.ServiceMethod and the index of the HTTPBinding within that methods
-// "HTTPBinding" slice.
+// NewBinding 创建HTTPBinding, 通过索引,请求访问父级对象 SeeriveMethod, 创建方法绑定信息
 func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 	binding := meth.Bindings[i]
 	nBinding := Binding{
@@ -136,6 +132,10 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 		if field.Type.Oneof != nil {
 			continue
 		}
+		// 如果没有获取到有效字段类型,跳过
+		if field.Type.Name == "" {
+			continue
+		}
 		newField := Field{
 			Name:           field.Name,
 			QueryParamName: field.PBFieldName,
@@ -147,11 +147,12 @@ func NewBinding(i int, meth *svcdef.ServiceMethod) *Binding {
 			StarExpr:       field.Type.StarExpr,
 			LocalName:      fmt.Sprintf("%s%s", pkg.GoCamelCase(field.Name), pkg.GoCamelCase(meth.Name)),
 		}
-		// log.Debugf("NewBinding field = %+v\n", newField)
+		// log.Debugf("NewBinding field = %+v\n", field.Type)
 
-		if field.Type.Message == nil && field.Type.Enum == nil && field.Type.Map == nil {
+		if field.Type.Message == nil && field.Type.Enum == nil && field.Type.Map == nil && pkg.IsGoBaseType(newField.GoType) {
 			newField.IsBaseType = true
 		}
+		// log.Debugf("NewBinding newField = %+v\n", newField)
 		// else {
 		// 	newField.GoType = "pb." + newField.GoType
 		// }
@@ -359,7 +360,7 @@ case {{$option.LocalName}}OK:
 // convert the string form of the field to it's correct go type.
 func createDecodeConvertFunc(f Field) (string, bool) {
 	needsErrorCheck := true
-	// log.Debugf("[createDecodeConvertFunc] field[%v].GoType=%v.IsBaseType=%v, filed.StarExpr=%v\n", f.Name, f.GoType, f.IsBaseType, f.StarExpr)
+	// log.Debugf("[createDecodeConvertFunc] field[%v].GoType=%v.IsBaseType=%v, Repeated=%v,filed.StarExpr=%v\n", f.Name, f.GoType, f.IsBaseType, f.Repeated, f.StarExpr)
 	goType := f.GoType
 	// 根据 Repeated 属性设置[]
 	// goType := strings.TrimPrefix(f.GoType, "[]")
@@ -391,12 +392,21 @@ func createDecodeConvertFunc(f Field) (string, bool) {
 		return fmt.Sprintf(fType, f.LocalName, f.LocalName+"Str"), true
 	}
 
-	// Use json unmarshalling for any custom/repeated messages
+	// 使用 json unmarshalling 任意自定义类型和重复类型
 	if !f.IsBaseType || f.Repeated {
 		// Args representing single custom message types are represented as
 		// pointers. To do a bare assignment to a pointer, our rvalue must be a
 		// pointer as well. So we special case args of a single custom message
 		// type so that the variable LocalName is declared as a pointer.
+
+		// var PageBaseStatsList *PageBase
+		// PageBaseStatsList = &PageBase{}
+		// err = json.Unmarshal([]byte(PageBaseStatsListStr), PageBaseStatsList)
+		// if err != nil {
+		// 	return nil, errors.Wrapf(err, "couldn't decode PageBaseStatsList from %v", PageBaseStatsListStr)
+		// }
+		// req.PageBase = PageBaseStatsList
+
 		singleCustomTypeUnmarshalTmpl := `
 var {{.LocalName}} {{if .StarExpr -}}*{{- end -}}{{.GoType}}
 {{.LocalName}} = {{if .StarExpr -}}&{{- end -}}{{.GoType}}{}
@@ -461,7 +471,7 @@ if len({{.LocalName}}StrArr) > 1 {
 				jsonConvTmpl = repeatedUnmarshalTmpl + errorCheckingTmpl
 			}
 		}
-		log.Debugf("[UnmarshalNonBaseType] = %v", jsonConvTmpl)
+		// log.Debugf("[UnmarshalNonBaseType] = %v", jsonConvTmpl)
 		code, err := ApplyTemplate("UnmarshalNonBaseType", jsonConvTmpl, f, TemplateFuncs)
 		if err != nil {
 			panic(fmt.Sprintf("Couldn't apply template: %v", err))

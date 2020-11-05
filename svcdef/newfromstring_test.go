@@ -23,7 +23,7 @@ func basicFromString(t *testing.T) *Svcdef {
 		// General package
 		package general;
 
-		import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
+		import "google/api/annotations.proto";
 
 		message SumRequest {
 			int64 a = 1;
@@ -168,7 +168,7 @@ func TestNoHTTPBinding(t *testing.T) {
 		// General package
 		package general;
 
-		import "github.com/teamlint/baron/deftree/googlethirdparty/annotations.proto";
+		import "google/api/annotations.proto";
 
 		message SumRequest {
 			int64 a = 1;

@@ -54,6 +54,8 @@ func setType(f *FieldType, tmap map[string]typeBox) {
 	case entry.Enum != nil:
 		f.Enum = entry.Enum
 	case entry.Message != nil:
+		// log.Printf("[setType] filedType=%+v, tmap=%+v", f, tmap)
+		// log.Printf("[setType] filedType=%+v, entry.Message=%+v", f, entry.Message)
 		f.Message = entry.Message
 	}
 }

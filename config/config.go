@@ -22,4 +22,6 @@ type Config struct {
 	GenClient bool
 	// Service transport protocol: all|grpc|http|nats
 	Transport string
+	// 服务定义
+	Svcdef bool
 }

@@ -15,6 +15,14 @@ import (
 func GeneratePBDotGo(protoPaths, gopath []string, outDir string) error {
 	genGoCode := []string{
 		"--go_out=" + outDir,
+		// "Mgoogle/protobuf/any.proto=google.golang.org/protobuf/types/known/anypb;" +
+		// "Mgoogle/protobuf/duration.proto=google.golang.org/protobuf/types/known/durationpb;" +
+		// "Mgoogle/protobuf/empty.proto=google.golang.org/protobuf/types/known/emptypb;" +
+		// "Mgoogle/protobuf/struct.proto=google.golang.org/protobuf/types/known/structpb;" +
+		// "Mgoogle/protobuf/timestamp.proto=google.golang.org/protobuf/types/known/timestampb;" +
+		// "Mgoogle/protobuf/wrappers.proto=google.golang.org/protobuf/types/known/wrapperspb;" +
+		// "Mgoogle/protobuf/field_mask.proto=google.golang.org/protobuf/types/known/fieldmaskpb" +
+		// ":" + outDir,
 		"--go_opt=paths=source_relative",
 		"--go-grpc_out=" + outDir,
 		// "--go-grpc_out=require_unimplemented_servers=false:" + outDir,
@@ -125,7 +133,7 @@ func protoc(protoPaths, gopath []string, plugin []string) error {
 	)
 
 	outBytes, err := protocExec.CombinedOutput()
-	log.Debugf("protoc args: %v\n", protocExec.Args)
+	log.Debugf("protoc cmd: %v\n", protocExec.Args)
 	if err != nil {
 		return errors.Wrapf(err,
 			"protoc exec failed.\nprotoc output:\n\n%v\nprotoc arguments:\n\n%v\n\n",

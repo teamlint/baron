@@ -20,4 +20,4 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )
 
-replace github.com/teamlint/baron v0.2.3 => ../
+replace github.com/teamlint/baron v0.2.4 => ../

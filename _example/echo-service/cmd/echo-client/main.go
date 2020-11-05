@@ -9,7 +9,14 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/rs/xid"
 
+	// timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/teamlint/baron/_example/api/echo"
+	"google.golang.org/protobuf/proto"
+	structpb "google.golang.org/protobuf/types/known/structpb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
+
+	// "github.com/teamlint/baron/protobuf/types/known/timestamppb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 
 	"google.golang.org/grpc"
 )
@@ -53,6 +60,7 @@ func main() {
 		in.In = "grpc->" + xid.New().String()
 		now := time.Now().Unix()
 		in.At = &now
+		in.CreatedAt = timestamppb.Now()
 		out, err := baronGRPCClient.Echo(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.GRPCClient] Echo.Echo err=%v\n", err)
@@ -94,10 +102,18 @@ func main() {
 		ctx := context.Background()
 		var in pb.EchoRequest
 		in.In = "http->" + xid.New().String()
-		now := time.Now().Unix()
-		in.At = &now
-		desc := "HTTP测试可选字段"
-		in.Desc = &desc
+		in.At = proto.Int64(time.Now().Unix())
+		in.Desc = proto.String("HTTP测试可选字段")
+		in.CreatedAt = timestamppb.Now()
+		// in.JsonStr = wrapperspb.String("wrappers字段")
+		in.JsonInt64 = wrapperspb.Int64(65535)
+		sd := structpb.Struct{
+			Fields: map[string]*structpb.Value{
+				"k1": structpb.NewStringValue("struct字段值"),
+			},
+		}
+		in.StructData = &sd
+
 		baronHTTPClient, err := pb.NewHTTPClient(httpAddr)
 		if err != nil {
 			log.Fatal(err)
@@ -162,6 +178,7 @@ func main() {
 		in.In = "nats->" + xid.New().String()
 		now := time.Now().Unix()
 		in.At = &now
+		in.CreatedAt = timestamppb.Now()
 		out, err := baronNATSClient.Echo(ctx, &in)
 		if err != nil {
 			log.Fatalf("[Baron.NATSClient] Echo.Echo err=%v\n", err)
