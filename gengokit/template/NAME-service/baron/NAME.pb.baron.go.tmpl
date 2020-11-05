@@ -690,7 +690,6 @@ func CtxValuesToSend(keys ...string) httptransport.ClientOption {
 
 		{{- if ne $binding.Verb "get" }}
 		// Set the body parameters
-		var buf bytes.Buffer
 		toRet := request.(*{{GoName $binding.Parent.RequestType}})
 		{{- range $field := $binding.Fields -}}
 			{{if eq $field.Location "body"}}
