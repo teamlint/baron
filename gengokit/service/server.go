@@ -27,3 +27,13 @@ func (r *ServerRender) Render(path string, data *gengokit.Data) (io.Reader, erro
 	}
 	return data.ApplyTemplateFromPath(path)
 }
+
+// IsFirst 首次生成
+func (r *ServerRender) IsFirst() bool {
+	return r.prev == nil
+}
+
+// IsModified 代码是否更改
+func (r *ServerRender) IsModified() bool {
+	return false
+}

@@ -29,3 +29,13 @@ func (r *HookRender) Render(path string, data *gengokit.Data) (io.Reader, error)
 	}
 	return data.ApplyTemplateFromPath(path)
 }
+
+// IsFirst 首次生成
+func (r *HookRender) IsFirst() bool {
+	return r.prev == nil
+}
+
+// IsModified 代码是否更改
+func (r *HookRender) IsModified() bool {
+	return false
+}

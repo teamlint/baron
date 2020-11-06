@@ -33,7 +33,7 @@ const (
 )
 
 var (
-	svcOutFlag    = flag.StringP("svcout", "o", "", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
+	svcOutFlag    = flag.StringP("svcout", "o", "./", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
 	verboseFlag   = flag.BoolP("verbose", "v", false, "Verbose output")
 	helpFlag      = flag.BoolP("help", "h", false, "Print usage")
 	startFlag     = flag.BoolP("start", "s", false, "Output a 'start.proto' protobuf file in ./")
@@ -41,6 +41,7 @@ var (
 	clientFlag    = flag.BoolP("client", "c", false, "Generate NAME-service client")
 	transportFlag = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|nats]")
 	svcdefFlag    = flag.BoolP("svcdef", "d", false, "Print service definition")
+	debugFlag     = flag.BoolP("debug", "", false, "Debug output")
 )
 
 var binName = filepath.Base(os.Args[0])
@@ -74,7 +75,7 @@ func init() {
 	buildinfo = fmt.Sprintf("%s version date: %s", buildinfo, date)
 
 	flag.Usage = func() {
-		if buildinfo != "" && (*verboseFlag || *helpFlag) {
+		if buildinfo != "" && (*verboseFlag || *helpFlag || *debugFlag) {
 			fmt.Fprintf(os.Stderr, "%s (%s)\n", binName, strings.TrimSpace(buildinfo))
 		}
 		fmt.Fprintf(os.Stderr, "\nUsage: %s [options] <protofile>...\n", binName)
@@ -148,7 +149,6 @@ func main() {
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "cannot to write output"))
 		}
-		log.Infof(">> %s", dst)
 	}
 
 	cleanupOldFiles(cfg.ServicePath, strings.ToLower(sd.Service.Name))
@@ -195,8 +195,8 @@ func parseInput() (*config.Config, error) {
 	}
 	// 输出文件
 	for _, p := range cfg.DefPaths {
-		log.Infof("-> %s", parsesvcname.GetPBFileName(p, cfg.PBPath))
-		log.Infof("-> %s", parsesvcname.GetGRPCPBFileName(p, cfg.PBPath))
+		log.Infof("*> %s", parsesvcname.GetPBFileName(p, cfg.PBPath))
+		log.Infof("*> %s", parsesvcname.GetGRPCPBFileName(p, cfg.PBPath))
 	}
 
 	// Service Path
@@ -322,7 +322,9 @@ func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 func generateGoKitCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Reader, error) {
 	conf := ggkconf.Config{
 		PBPackage:     cfg.PBPackage,
+		PBPath:        cfg.PBPath,
 		GoPackage:     cfg.ServicePackage,
+		ServicePath:   cfg.ServicePath,
 		PreviousFiles: cfg.PrevGen,
 		GenClient:     cfg.GenClient,
 		Transport:     cfg.Transport,
@@ -343,7 +345,9 @@ func generateGoKitCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Rea
 func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 	conf := ggkconf.Config{
 		PBPackage:     cfg.PBPackage,
+		PBPath:        cfg.PBPath,
 		GoPackage:     cfg.ServicePackage,
+		ServicePath:   cfg.ServicePath,
 		PreviousFiles: cfg.PrevGen,
 		GenClient:     cfg.GenClient,
 		Transport:     cfg.Transport,
@@ -364,7 +368,7 @@ func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 		if err != nil {
 			return errors.Wrap(err, "cannot generate baron service")
 		}
-		log.Infof("-> %s", baronPath)
+		// log.Infof("*> %s", baronPath)
 	}
 
 	return nil
@@ -440,7 +444,7 @@ func readPreviousGeneration(serviceDir string, svcName string) (map[string]io.Re
 
 		// ensure relPath is unix-style, so it matches what we look for later
 		relPath = filepath.ToSlash(relPath)
-		log.Infof("*> %s", filepath.Join(serviceDir, relPath))
+		// log.Infof("*> %s", filepath.Join(serviceDir, relPath))
 		files[relPath] = file
 
 		return nil
@@ -554,6 +558,9 @@ func initLog() {
 	log.SetLevel(log.InfoLevel)
 	if *verboseFlag {
 		log.SetLevel(log.DebugLevel)
+	}
+	if *debugFlag {
+		log.SetLevel(log.TraceLevel)
 		log.SetReportCaller(true)
 	}
 }
