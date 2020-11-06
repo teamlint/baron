@@ -37,7 +37,13 @@ Baron 根据 proto 文件快速生成 [go-kit](https://github.com/go-kit/kit) �
 
 - [ ] server 初始化中间件
 
-  
+- [ ] 使用 [zerolog](https://github.com/rs/zerolog) 替换 [logrus](https://github.com/sirupsen/logrus)
+
+- [ ] HTTP 错误标准化 
+
+- [ ] CLI 子命令
+
+
 
 ## 安装
 
@@ -295,6 +301,8 @@ http://localhost:5050/echo?json_str=%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%
 ## 参考
 
 - [truss](https://github.com/metaverse/truss) Truss helps you build go-kit microservices without having to worry about writing or maintaining boilerplate code.
+- [go-kit](https://github.com/go-kit/kit) A standard library for microservices
+- [nitro](https://github.com/asim/nitro) Nitro (formerly known as Go Micro) is a blazingly fast framework for distributed app development
 - https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码
 - https://github.com/OahcUil94/go-kit-training go-kit微服务套件使用
 - https://github.com/phungvandat/clean-architecture Example about clean architecture in golang

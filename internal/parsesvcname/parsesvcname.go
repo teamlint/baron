@@ -28,14 +28,8 @@ func FromPaths(gopath []string, protoDefPaths []string) (string, error) {
 	// Get path names of .pb.go files
 	pbgoPaths := []string{}
 	for _, p := range protoDefPaths {
-		base := filepath.Base(p)
-		barename := strings.TrimSuffix(base, filepath.Ext(p))
-		// pb.go
-		pbgp := filepath.Join(td, barename+".pb.go")
-		pbgoPaths = append(pbgoPaths, pbgp)
-		// grpc.pb.go
-		grpcpbgp := filepath.Join(td, barename+"_grpc.pb.go")
-		pbgoPaths = append(pbgoPaths, grpcpbgp)
+		pbgoPaths = append(pbgoPaths, GetPBFileName(p, td))     // pb.go
+		pbgoPaths = append(pbgoPaths, GetGRPCPBFileName(p, td)) // grpc.pb.go
 	}
 
 	// Open all .pb.go files and store in map to be passed to svcdef.New()
@@ -91,4 +85,22 @@ func FromReaders(gopath []string, protoDefReaders []io.Reader) (string, error) {
 		protoDefPaths = append(protoDefPaths, path)
 	}
 	return FromPaths(gopath, protoDefPaths)
+}
+
+// GetPBFileName 获取生成的.pb.go 文件名称
+// pbPath pb输出路径
+// protoPath proto 定义路径
+func GetPBFileName(protoPath string, pbPath string) string {
+	base := filepath.Base(protoPath)
+	barename := strings.TrimSuffix(base, filepath.Ext(protoPath))
+	return filepath.Join(pbPath, barename+".pb.go")
+}
+
+// GetGRPCPBFileName 获取生成的.pb.go 文件名称
+// pbPath pb输出路径
+// protoPath proto 定义路径
+func GetGRPCPBFileName(protoPath string, pbPath string) string {
+	base := filepath.Base(protoPath)
+	barename := strings.TrimSuffix(base, filepath.Ext(protoPath))
+	return filepath.Join(pbPath, barename+"_grpc.pb.go")
 }

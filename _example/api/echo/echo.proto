@@ -50,6 +50,13 @@ service Echo {
       get: "/louder/{loudness}"
     };
   }
+
+  rpc EchoStream (stream EchoRequest) returns (stream EchoResponse) {
+    option (google.api.http) = {
+      // gRPC stream test
+      get: "/echo/stream"
+    };
+  }
 }
 
 message Msg {

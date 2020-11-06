@@ -139,6 +139,5 @@ func protoc(protoPaths, gopath []string, plugin []string) error {
 			"protoc exec failed.\nprotoc output:\n\n%v\nprotoc arguments:\n\n%v\n\n",
 			string(outBytes), protocExec.Args)
 	}
-
 	return nil
 }

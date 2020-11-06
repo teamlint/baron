@@ -33,14 +33,14 @@ const (
 )
 
 var (
-	svcPackageFlag = flag.StringP("svcout", "o", "", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
-	verboseFlag    = flag.BoolP("verbose", "v", false, "Verbose output")
-	helpFlag       = flag.BoolP("help", "h", false, "Print usage")
-	startFlag      = flag.BoolP("start", "s", false, "Output a 'start.proto' protobuf file in ./")
-	versionFlag    = flag.BoolP("version", "V", false, "Print version")
-	clientFlag     = flag.BoolP("client", "c", false, "Generate NAME-service client")
-	transportFlag  = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|nats]")
-	svcdefFlag     = flag.BoolP("svcdef", "d", false, "Print service definition")
+	svcOutFlag    = flag.StringP("svcout", "o", "", "Go package path where the generated Go service will be written. Trailing slash will create a NAME-service directory")
+	verboseFlag   = flag.BoolP("verbose", "v", false, "Verbose output")
+	helpFlag      = flag.BoolP("help", "h", false, "Print usage")
+	startFlag     = flag.BoolP("start", "s", false, "Output a 'start.proto' protobuf file in ./")
+	versionFlag   = flag.BoolP("version", "V", false, "Print version")
+	clientFlag    = flag.BoolP("client", "c", false, "Generate NAME-service client")
+	transportFlag = flag.StringP("transport", "t", "all", "Service transport protocol: [grpc|nats]")
+	svcdefFlag    = flag.BoolP("svcdef", "d", false, "Print service definition")
 )
 
 var binName = filepath.Base(os.Args[0])
@@ -96,12 +96,6 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%s (%s)\n", binName, strings.TrimSpace(buildinfo))
 		os.Exit(0)
 	}
-
-	log.SetLevel(log.InfoLevel)
-	if *verboseFlag {
-		log.SetLevel(log.DebugLevel)
-	}
-
 	if *startFlag {
 		pkg := ""
 		outDir := ""
@@ -119,6 +113,8 @@ func main() {
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	initLog()
 
 	cfg, err := parseInput()
 	if err != nil {
@@ -141,16 +137,18 @@ func main() {
 		log.Fatal(errors.Wrapf(err, "cannot generate {{.sd.PkgName}}.pb.baron.go"))
 	}
 
-	genFiles, err := generateCode(cfg, sd)
+	genFiles, err := generateGoKitCode(cfg, sd)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "cannot generate service"))
 	}
 
 	for path, file := range genFiles {
-		err := gengokit.WriteGenFile(file, filepath.Join(cfg.ServicePath, path))
+		dst := filepath.Join(cfg.ServicePath, path)
+		err := gengokit.WriteGenFile(file, dst)
 		if err != nil {
 			log.Fatal(errors.Wrap(err, "cannot to write output"))
 		}
+		log.Infof(">> %s", dst)
 	}
 
 	cleanupOldFiles(cfg.ServicePath, strings.ToLower(sd.Service.Name))
@@ -182,7 +180,7 @@ func parseInput() (*config.Config, error) {
 	log.WithField("DefPaths", cfg.DefPaths).Debug()
 
 	protoDir := filepath.Dir(cfg.DefPaths[0])
-	p, err := packages.Load(nil, protoDir)
+	p, err := packages.Load(nil, protoDir) // 获取导入包
 	if err != nil || len(p) == 0 {
 		return nil, errors.Wrap(err, "proto files not found in importable go package")
 	}
@@ -195,12 +193,17 @@ func parseInput() (*config.Config, error) {
 	if err := execprotoc.GeneratePBDotGo(cfg.DefPaths, cfg.GoPath, cfg.PBPath); err != nil {
 		return nil, errors.Wrap(err, "cannot create .pb.go files")
 	}
+	// 输出文件
+	for _, p := range cfg.DefPaths {
+		log.Infof("-> %s", parsesvcname.GetPBFileName(p, cfg.PBPath))
+		log.Infof("-> %s", parsesvcname.GetGRPCPBFileName(p, cfg.PBPath))
+	}
 
 	// Service Path
+	// 生成代码在临时目录, 获取服务名称
 	svcName, err := parsesvcname.FromPaths(cfg.GoPath, cfg.DefPaths)
 	if err != nil {
 		log.Warnf("No valid service is defined; exiting now: %v", err)
-		log.Info(".pb.go generation with protoc-gen-go was successful.")
 		return nil, nil
 	}
 
@@ -209,11 +212,13 @@ func parseInput() (*config.Config, error) {
 	svcDirName := svcName + "-service"
 	log.WithField("svcDirName", svcDirName).Debug()
 
-	svcPath := filepath.Join(filepath.Dir(cfg.DefPaths[0]), svcDirName)
+	// svcPath := filepath.Join(filepath.Dir(cfg.DefPaths[0]), svcDirName)
+	// svcOut 服务输出目录不与 proto 关联,默认当前目录
+	svcPath := filepath.Join(".", svcDirName)
 
-	if *svcPackageFlag != "" {
-		svcOut := *svcPackageFlag
-		log.WithField("svcPackageFlag", svcOut).Debug()
+	if *svcOutFlag != "" {
+		svcOut := *svcOutFlag
+		log.WithField("svcOutFlag", svcOut).Debug()
 
 		// If the package flag ends in a seperator, file will be "".
 		_, file := filepath.Split(svcOut)
@@ -231,7 +236,7 @@ func parseInput() (*config.Config, error) {
 		}
 	}
 
-	log.WithField("svcPath", svcPath).Debug()
+	// log.WithField("svcPath", svcPath).Debug()
 
 	// Create svcPath for the case that it does not exist
 	err = os.MkdirAll(svcPath, 0777)
@@ -250,7 +255,7 @@ func parseInput() (*config.Config, error) {
 	cfg.ServicePath = svcPath
 
 	log.WithField("Service Package", cfg.ServicePackage).Debug()
-	log.WithField("package name", p[0].Name).Debug()
+	log.WithField("Service PkgName", p[0].Name).Debug()
 	log.WithField("Service Path", cfg.ServicePath).Debug()
 
 	// PrevGen
@@ -262,8 +267,9 @@ func parseInput() (*config.Config, error) {
 	return &cfg, nil
 }
 
-// parseSVCOut handles the difference between relative paths and go package
-// paths
+// parseSVCOut 解析服务输出目录
+// 如果是相对路径转化为绝对路径
+// 否则使用 GOPATH + svcOut 路径
 func parseSVCOut(svcOut string, GOPATH string) (string, error) {
 	if build.IsLocalImport(svcOut) {
 		return filepath.Abs(svcOut)
@@ -285,14 +291,8 @@ func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 	// Get path names of .pb.go|grpc.pb.go files
 	pbgoPaths := []string{}
 	for _, p := range protoDefPaths {
-		base := filepath.Base(p)
-		barename := strings.TrimSuffix(base, filepath.Ext(p))
-		// .pb.go
-		pbgp := filepath.Join(cfg.PBPath, barename+".pb.go")
-		pbgoPaths = append(pbgoPaths, pbgp)
-		// grpc.pb.go
-		grpcpbgp := filepath.Join(cfg.PBPath, barename+"_grpc.pb.go")
-		pbgoPaths = append(pbgoPaths, grpcpbgp)
+		pbgoPaths = append(pbgoPaths, parsesvcname.GetPBFileName(p, cfg.PBPath))     // pb.go
+		pbgoPaths = append(pbgoPaths, parsesvcname.GetGRPCPBFileName(p, cfg.PBPath)) // grpc.pb.go
 	}
 	pbgoFiles, err := openFiles(pbgoPaths)
 	if err != nil {
@@ -317,9 +317,9 @@ func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 	return sd, nil
 }
 
-// generateCode returns a map[string]io.Reader that represents a gokit
+// generateGoKitCode returns a map[string]io.Reader that represents a gokit
 // service
-func generateCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Reader, error) {
+func generateGoKitCode(cfg *config.Config, sd *svcdef.Svcdef) (map[string]io.Reader, error) {
 	conf := ggkconf.Config{
 		PBPackage:     cfg.PBPackage,
 		GoPackage:     cfg.ServicePackage,
@@ -364,6 +364,7 @@ func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 		if err != nil {
 			return errors.Wrap(err, "cannot generate baron service")
 		}
+		log.Infof("-> %s", baronPath)
 	}
 
 	return nil
@@ -439,7 +440,7 @@ func readPreviousGeneration(serviceDir string, svcName string) (map[string]io.Re
 
 		// ensure relPath is unix-style, so it matches what we look for later
 		relPath = filepath.ToSlash(relPath)
-		log.Debugf("[parseInput] prev file = %v\n", relPath)
+		log.Infof("*> %s", filepath.Join(serviceDir, relPath))
 		files[relPath] = file
 
 		return nil
@@ -542,4 +543,17 @@ func makeAndRunbaron(args []string) error {
 	baron := exec.Command("baron", args[1:]...)
 	baron.Stdin, baron.Stdout, baron.Stderr = os.Stdin, os.Stdout, os.Stderr
 	return baron.Run()
+}
+
+func initLog() {
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp:          false,
+		DisableLevelTruncation: false,
+		TimestampFormat:        "2006-01-02 15:04:05",
+	})
+	log.SetLevel(log.InfoLevel)
+	if *verboseFlag {
+		log.SetLevel(log.DebugLevel)
+		log.SetReportCaller(true)
+	}
 }

@@ -25,8 +25,13 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/kr/pretty"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	ErrNotSupported = errors.New("not supported")
 )
 
 // Svcdef is the top-level struct for the definition of a service.
@@ -420,13 +425,16 @@ func NewService(s *ast.TypeSpec, info *DebugInfo) (*Service, error) {
 	}
 	asvc := s.Type.(*ast.InterfaceType)
 	for _, m := range asvc.Methods.List {
-		log.Debugf("NewService method = %v.%v", s.Name.Name, m.Names[0].Name)
+		log.Debugf("[svcdef/svcdef.go].NewService Method = %v.%v\n", s.Name.Name, m.Names[0].Name)
 		if !ast.IsExported(m.Names[0].Name) {
 			log.Debugf("Not Exported %v.%v", s.Name.Name, m.Names[0].Name)
 			continue
 		}
 		nmeth, err := NewServiceMethod(m, info)
 		if err != nil {
+			if err == ErrNotSupported {
+				continue
+			}
 			return nil, errors.Wrapf(err, "cannot create service method %q of service %q", m.Names[0].Name, rv.Name)
 		}
 		rv.Methods = append(rv.Methods, nmeth)
@@ -459,6 +467,22 @@ func NewServiceMethod(m *ast.Field, info *DebugInfo) (*ServiceMethod, error) {
 	//                                RequestType       ResponseType
 	//            └──────────────────────────────┘   └─────────────────────┘
 	//                         input                         output
+
+	log.Debugf("\tinput:\n")
+	for i, f := range input {
+		log.Debugf("\t\tinput[%v] = %# v\n", i, pretty.Formatter(f))
+	}
+	log.Debugf("\toutput:\n")
+	for i, f := range output {
+		log.Debugf("\t\toutput[%v] = %# v\n", i, pretty.Formatter(f))
+	}
+
+	// 检查入参数量, grpc.CallOption 没在参数列表中, stream 目前不支持
+	if len(input) < 2 {
+		msg := "the %s method is not standard gRPC method, not supported"
+		log.Warnf(msg, rv.Name)
+		return nil, errors.Wrapf(ErrNotSupported, msg, rv.Name)
+	}
 
 	rq := input[1]
 	rs := output[0]

@@ -73,17 +73,22 @@ In your terminal, go to the folder containing echo.proto and run `baron *.proto`
 |   │   └── echo
 |   │       └── main.go
 |   ├── echo.pb.go
-|   ├── handlers
-|   │   ├── handlers.go
-|   │   ├── hooks.go
-|   │   └── middlewares.go
-|   └── svc
-|       └── ...
-└── echo.proto
+|   ├── echo.pb.baron.go
+|   ├── echo_grpc.pb.go
+|   ├── server
+|   │   └── server.go
+|   └── service
+|       ├── hooks.go
+|       ├── middlewares.go
+|       └── service.go
+├── echo.pb.baron.go
+├── echo.pb.go
+├── echo.proto
+└── echo_grpc.pb.go
 ```
 From the top down, within `echo-service/`:
-  - `svc/` contains the wiring and encoding protocols necessary for service communication (generated code)
-  - `handlers/handlers.go` is populated with stubs where you will add the business logic
+  - `./` contains the wiring and encoding protocols necessary for service communication (generated code)
+  - `service/service.go` is populated with stubs where you will add the business logic
   - `cmd/echo/` contains the service main, which you will build and run shortly
   - `echo.pb.go` contains the RPC interface definitions and supporting structures that have been translated from `echo.proto` to golang
 
@@ -152,7 +157,7 @@ The following is left as an exercise to the reader:
   - Define a new RPC call in echo.proto
     - regenerate service with baron, check that your old logic remains
     - implement the logic for your new call in a separate package, place it ouside of echo-service
-    - wire in the new logic by importing the package in the `handlers.go`
+    - wire in the new logic by importing the package in the `service.go`
   Suggestion: Save everything the service hears and echo all of it back. See repeated types (protobuf), package variables and init() function (golang).
   - Remove an RPC call definition from echo.proto
   	- regenerate service with baron, verify that the call no longer exists
