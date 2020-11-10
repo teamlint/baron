@@ -16,6 +16,7 @@ import (
 	"github.com/teamlint/baron/gengokit"
 	"github.com/teamlint/baron/gengokit/service"
 	templFiles "github.com/teamlint/baron/gengokit/template"
+	"github.com/teamlint/baron/pkg"
 
 	"github.com/teamlint/baron/svcdef"
 )
@@ -103,28 +104,34 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 		if genCode, err = h.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render service template: %s", templFP)
 		}
+		responseInfo(h, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.HookPath:
 		hook := service.NewHook(prevFile)
 		if genCode, err = hook.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render hook template: %s", templFP)
 		}
+		log.Tracef("ServicePath=%v", data.Config.ServicePath)
+		responseInfo(hook, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.MiddlewaresPath:
 		m := service.NewMiddlewares(prevFile)
 		// m.Load(prevFile)
 		if genCode, err = m.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render middleware template: %s", templFP)
 		}
+		responseInfo(m, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.CmdServerPath:
 		r := service.NewCmdServer(prevFile)
 		if genCode, err = r.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render cmd server template: %s", templFP)
 		}
+		responseInfo(r, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.CmdClientPath:
 		if data.Config.GenClient {
 			r := service.NewCmdClient(prevFile)
 			if genCode, err = r.Render(templFP, data); err != nil {
 				return nil, errors.Wrapf(err, "cannot render cmd client template: %s", templFP)
 			}
+			responseInfo(r, filepath.Join(data.Config.ServicePath, actualFP))
 		} else {
 			return nil, ErrGenIgnored
 		}
@@ -133,10 +140,20 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 		if genCode, err = r.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render server template: %s", templFP)
 		}
+		responseInfo(r, filepath.Join(data.Config.ServicePath, actualFP))
+	case service.BaronPath:
+		if genCode, err = applyTemplateFromPath(templFP, data); err != nil {
+			return nil, errors.Wrapf(err, "cannot render baron template: %s", templFP)
+		}
+		actualFP = strings.TrimPrefix(actualFP, "baron")
+		actualFP = filepath.Join(data.Config.PBPath, actualFP)
+		responseInfo(nil, actualFP)
 	default:
 		if genCode, err = applyTemplateFromPath(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render template: %s", templFP)
 		}
+		actualFP = filepath.Join(data.Config.ServicePath, actualFP)
+		responseInfo(nil, actualFP)
 	}
 
 	codeBytes, err := ioutil.ReadAll(genCode)
@@ -157,7 +174,7 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 func templatePathToActual(templFilePath, svcName string) string {
 	// Switch "NAME" in path with svcName.
 	// i.e. for svcName = addsvc; /NAME -> /addsvc-service/addsvc
-	actual := strings.Replace(templFilePath, "NAME", svcName, -1)
+	actual := strings.Replace(templFilePath, "NAME", strings.ToLower(svcName), -1)
 
 	actual = strings.TrimSuffix(actual, ".tmpl")
 
@@ -206,4 +223,32 @@ func WriteGenFile(file io.Reader, path string) error {
 		return errors.Wrapf(err, "cannot write to %v", path)
 	}
 	return outFile.Close()
+}
+
+// responseInfo 输出代码生成信息
+func responseInfo(r interface{}, outPath string) {
+	if r == nil {
+		if pkg.FileExists(outPath) {
+			log.Infof("*> %s", outPath)
+			return
+		}
+		log.Infof("-> %s", outPath)
+		return
+	}
+	if rs, ok := r.(gengokit.RenderStatus); ok {
+		if !pkg.FileExists(outPath) {
+			log.Infof("-> %s", outPath)
+			return
+		}
+
+		flag := "->"
+		if !rs.IsFirst() && rs.IsModified() {
+			flag = ">>"
+		} else {
+			flag = "=>"
+		}
+		log.Infof("%s %s", flag, outPath)
+		return
+	}
+
 }

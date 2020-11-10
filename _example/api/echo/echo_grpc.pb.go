@@ -23,6 +23,7 @@ type EchoClient interface {
 	Louder(ctx context.Context, in *LouderRequest, opts ...grpc.CallOption) (*EchoResponse, error)
 	// LouderGet is the same as Louder, but pulls fields other than Loudness (i.e. In) from query params instead of POST
 	LouderGet(ctx context.Context, in *LouderRequest, opts ...grpc.CallOption) (*EchoResponse, error)
+	EchoStream(ctx context.Context, opts ...grpc.CallOption) (Echo_EchoStreamClient, error)
 }
 
 type echoClient struct {
@@ -60,6 +61,37 @@ func (c *echoClient) LouderGet(ctx context.Context, in *LouderRequest, opts ...g
 	return out, nil
 }
 
+func (c *echoClient) EchoStream(ctx context.Context, opts ...grpc.CallOption) (Echo_EchoStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Echo_serviceDesc.Streams[0], "/echo.Echo/EchoStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &echoEchoStreamClient{stream}
+	return x, nil
+}
+
+type Echo_EchoStreamClient interface {
+	Send(*EchoRequest) error
+	Recv() (*EchoResponse, error)
+	grpc.ClientStream
+}
+
+type echoEchoStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *echoEchoStreamClient) Send(m *EchoRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *echoEchoStreamClient) Recv() (*EchoResponse, error) {
+	m := new(EchoResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // EchoServer is the server API for Echo service.
 // All implementations must embed UnimplementedEchoServer
 // for forward compatibility
@@ -70,6 +102,7 @@ type EchoServer interface {
 	Louder(context.Context, *LouderRequest) (*EchoResponse, error)
 	// LouderGet is the same as Louder, but pulls fields other than Loudness (i.e. In) from query params instead of POST
 	LouderGet(context.Context, *LouderRequest) (*EchoResponse, error)
+	EchoStream(Echo_EchoStreamServer) error
 	mustEmbedUnimplementedEchoServer()
 }
 
@@ -85,6 +118,9 @@ func (UnimplementedEchoServer) Louder(context.Context, *LouderRequest) (*EchoRes
 }
 func (UnimplementedEchoServer) LouderGet(context.Context, *LouderRequest) (*EchoResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LouderGet not implemented")
+}
+func (UnimplementedEchoServer) EchoStream(Echo_EchoStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method EchoStream not implemented")
 }
 func (UnimplementedEchoServer) mustEmbedUnimplementedEchoServer() {}
 
@@ -153,6 +189,32 @@ func _Echo_LouderGet_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Echo_EchoStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EchoServer).EchoStream(&echoEchoStreamServer{stream})
+}
+
+type Echo_EchoStreamServer interface {
+	Send(*EchoResponse) error
+	Recv() (*EchoRequest, error)
+	grpc.ServerStream
+}
+
+type echoEchoStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *echoEchoStreamServer) Send(m *EchoResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *echoEchoStreamServer) Recv() (*EchoRequest, error) {
+	m := new(EchoRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _Echo_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "echo.Echo",
 	HandlerType: (*EchoServer)(nil),
@@ -170,6 +232,13 @@ var _Echo_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Echo_LouderGet_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "EchoStream",
+			Handler:       _Echo_EchoStream_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "echo.proto",
 }

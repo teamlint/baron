@@ -31,3 +31,13 @@ func (m *Middlewares) Render(path string, data *gengokit.Data) (io.Reader, error
 	}
 	return data.ApplyTemplateFromPath(path)
 }
+
+// IsFirst 首次生成
+func (m *Middlewares) IsFirst() bool {
+	return m.prev == nil
+}
+
+// IsModified 代码是否更改
+func (m *Middlewares) IsModified() bool {
+	return false
+}

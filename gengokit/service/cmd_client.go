@@ -30,3 +30,13 @@ func (r *CmdClientRender) Render(path string, data *gengokit.Data) (io.Reader, e
 	}
 	return data.ApplyTemplateFromPath(path)
 }
+
+// IsFirst 首次生成
+func (r *CmdClientRender) IsFirst() bool {
+	return r.prev == nil
+}
+
+// IsModified 代码是否更改
+func (r *CmdClientRender) IsModified() bool {
+	return false
+}

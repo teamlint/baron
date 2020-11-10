@@ -14,13 +14,21 @@ import (
 	"github.com/teamlint/baron/svcdef"
 )
 
+// RenderStatus 表示 Renderable 状态的接口
+type RenderStatus interface {
+	IsFirst() bool    // 是否首次呈现
+	IsModified() bool // 是否改写
+}
+
 type Renderable interface {
 	Render(string, *Data) (io.Reader, error)
 }
 
 type Config struct {
 	GoPackage   string
+	ServicePath string // 服务输出目录
 	PBPackage   string
+	PBPath      string // .pb.go 输出目录
 	Version     string
 	VersionDate string
 

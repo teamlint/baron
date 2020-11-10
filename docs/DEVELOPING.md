@@ -142,3 +142,11 @@ userService = service.Compose(
 出现错误的请求流程: `ServerBefore -> 出现错误(decode -> endpoint -> encode) -> ServerErrHandler -> ServerErrorEncoder(可写httpResponse) -> ServerFinalizer`
 
 
+## 代码生成流程
+1. parseInput(返回config.Config ,包含ServicePackage,ServicePath(proto路径+服务名称)) 
+     -> execprotoc.GeneratePBDotGo 生成pb.go在目标目录
+     -> parsesvcname.FromPaths -> execprotoc.GeneratePBDotGo 生成代码临时目录 & svcdef.New 
+2. parseServiceDefinition(返回sd) -> svcdef.New(返回sd)
+3. generateBaronCode(cfg, sd)
+4. generateCode(cfg, sd)
+

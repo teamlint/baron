@@ -33,11 +33,19 @@ Baron 根据 proto 文件快速生成 [go-kit](https://github.com/go-kit/kit) �
 
 - [x] `google/protobuf/struct.proto` 字段类型支持
 
+- [ ] 文档生成 
+
 - [ ] gRPC Stream 
 
 - [ ] server 初始化中间件
 
-  
+- [ ] 使用 [zerolog](https://github.com/rs/zerolog) 替换 [logrus](https://github.com/sirupsen/logrus)
+
+- [ ] HTTP 错误标准化 
+
+- [ ] CLI 子命令
+
+
 
 ## 安装
 
@@ -256,31 +264,32 @@ if err != nil {
 ## 注意事项
 - HTTP 服务请求如果使用查询字符串传递复杂数据类型, 需要将字段值编码为JSON并做URL编码, 使用请求体传值可直接使用**原始值**
 
-	**服务定义**
-  
-  ```protobuf
-  message EchoRequest {
-  	google.protobuf.StringValue json_str  = 6;
-  }
+**服务定义**
+
+```protobuf
+message EchoRequest {
+	google.protobuf.StringValue json_str  = 6;
+}
 ```
-  
-  **使用 URL 查询参数传值**
-  
-  - 将参数 JSON 序列化
-  `{"value":"Hello世界"}`
-  
-  - URL 编码
-    `%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D`
-    ```http
-    http://localhost:5050/echo?json_str=%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D
-    ```
-  
+
+**使用 URL 查询参数传值**
+
+- 将参数 JSON 序列化
+`{"value":"Hello世界"}`
+
+- URL 编码
+  `%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D`
+
+```http
+http://localhost:5050/echo?json_str=%7B%22value%22%3A%22Hello%E4%B8%96%E7%95%8C%22%7D
+```
+
   **使用 HTTP Body 传值**
-  
+
   ```json
-  {
-  	"json_str": "Hello世界"
-  }
+{
+  "json_str": "Hello世界"
+}
   ```
 
 
@@ -294,6 +303,8 @@ if err != nil {
 ## 参考
 
 - [truss](https://github.com/metaverse/truss) Truss helps you build go-kit microservices without having to worry about writing or maintaining boilerplate code.
+- [go-kit](https://github.com/go-kit/kit) A standard library for microservices
+- [nitro](https://github.com/asim/nitro) Nitro (formerly known as Go Micro) is a blazingly fast framework for distributed app development
 - https://github.com/solo726/bookinfo 使用go-kit实现微服务,truss自动生成go-kit代码
 - https://github.com/OahcUil94/go-kit-training go-kit微服务套件使用
 - https://github.com/phungvandat/clean-architecture Example about clean architecture in golang

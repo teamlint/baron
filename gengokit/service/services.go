@@ -27,7 +27,7 @@ const ignoredFunc = "NewService"
 // New should be passed the previous version of the service to parse.
 func NewService(svc *svcdef.Service, prev io.Reader) (gengokit.Renderable, error) {
 	var h handler
-	log.WithField("Service Methods", len(svc.Methods)).Debug("Service being created")
+	log.WithField("Service Methods", len(svc.Methods)).Trace("Service being created")
 	h.mMap = newMethodMap(svc.Methods)
 	h.service = svc
 
@@ -80,12 +80,12 @@ func (h *handler) Render(alias string, data *gengokit.Data) (io.Reader, error) {
 
 	// Remove exported methods not defined in service definition
 	// and remove methods defined in the previous file from methodMap
-	log.WithField("Service Methods", len(h.mMap)).Debug("Before prune")
+	log.WithField("Service Methods", len(h.mMap)).Trace("Before prune")
 	// Lowercase the service name before pruning because the templates all
 	// lowercase the service name when generating code to ensure Identifiers
 	// incorporating the service name remain unexported.
 	h.ast.Decls = h.mMap.pruneDecls(h.ast.Decls, strings.ToLower(data.Service.Name))
-	log.WithField("Service Methods", len(h.mMap)).Debug("After prune")
+	log.WithField("Service Methods", len(h.mMap)).Trace("After prune")
 
 	// create a new handlerData, and add all methods not defined in the previous file
 	ex := handlerData{
@@ -132,6 +132,16 @@ func (h *handler) buffer() (*bytes.Buffer, error) {
 	}
 
 	return code, nil
+}
+
+// IsFirst 首次生成
+func (h *handler) IsFirst() bool {
+	return h.ast == nil
+}
+
+// IsModified 代码是否更改
+func (h *handler) IsModified() bool {
+	return len(h.mMap) > 0
 }
 
 // pruneDecls constructs a new []ast.Decls with the exported funcs in decls
@@ -283,11 +293,11 @@ func exprString(e ast.Expr) string {
 }
 
 func applyServiceTempl(exec *gengokit.Data) (io.Reader, error) {
-	log.Debug("Rendering handler for the first time")
+	log.Info("** Rendering handler for the first time")
 	return exec.ApplyTemplate(template.MustAssetString(ServicePath), "ServiceTmpl")
 }
 
 func applyServiceMethodsTempl(data handlerData) (io.Reader, error) {
-	log.Debugf("[applyServiceMethodsTempl] data = %+v, type=%T", data, data)
+	log.Trace("data = %+v, type=%T", data, data)
 	return gengokit.ApplyTemplate(template.MustAssetString(ServiceMethodsPath), "ServiceMethodsTmpl", data, gengokit.FuncMap)
 }
