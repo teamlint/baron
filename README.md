@@ -33,6 +33,8 @@ Baron 根据 proto 文件快速生成 [go-kit](https://github.com/go-kit/kit) �
 
 - [x] `google/protobuf/struct.proto` 字段类型支持
 
+- [ ] 文档生成 
+
 - [ ] gRPC Stream 
 
 - [ ] server 初始化中间件
