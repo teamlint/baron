@@ -29,7 +29,6 @@ func HTTPServerOptions() []httptransport.ServerOption {
 	// 	httptransport.ServerErrorEncoder(errorEncoder),
 	// 	httptransport.ServerAfter(httptransport.SetContentType(contentType)),
 	// }
-	// aaaq
 	return nil
 }
 
