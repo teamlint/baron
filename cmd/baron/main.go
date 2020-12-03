@@ -82,6 +82,12 @@ func init() {
 		fmt.Fprintf(os.Stderr, "\nGenerates %s(go-kit) services using proto3 and gRPC definitions.\n", binName)
 		fmt.Fprintln(os.Stderr, "\nOptions:")
 		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "\nOutputs:")
+		fmt.Fprintln(os.Stderr, "  *>\t Override")
+		fmt.Fprintln(os.Stderr, "  ->\t First create")
+		fmt.Fprintln(os.Stderr, "  =>\t No change")
+		fmt.Fprintln(os.Stderr, "  >>\t Modified")
+		fmt.Fprintln(os.Stderr)
 	}
 }
 
@@ -430,7 +436,6 @@ func readPreviousGeneration(serviceDir string, svcName string) (map[string]io.Re
 				return filepath.SkipDir
 			}
 		}
-
 		file, ioErr := os.Open(path)
 		if ioErr != nil {
 			return errors.Wrapf(ioErr, "cannot read file: %v", path)
@@ -444,7 +449,12 @@ func readPreviousGeneration(serviceDir string, svcName string) (map[string]io.Re
 
 		// ensure relPath is unix-style, so it matches what we look for later
 		relPath = filepath.ToSlash(relPath)
-		// log.Infof("*> %s", filepath.Join(serviceDir, relPath))
+		// exclude server/server.go
+		log.Tracef("relPath=%s", relPath)
+		if relPath == "server/server.go" {
+			return nil
+		}
+		log.Tracef("[prev] %s", filepath.ToSlash(filepath.Join(serviceDir, relPath)))
 		files[relPath] = file
 
 		return nil

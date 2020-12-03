@@ -105,20 +105,12 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 			return nil, errors.Wrapf(err, "cannot render service template: %s", templFP)
 		}
 		responseInfo(h, filepath.Join(data.Config.ServicePath, actualFP))
-	case service.HookPath:
-		hook := service.NewHook(prevFile)
-		if genCode, err = hook.Render(templFP, data); err != nil {
-			return nil, errors.Wrapf(err, "cannot render hook template: %s", templFP)
-		}
-		log.Tracef("ServicePath=%v", data.Config.ServicePath)
-		responseInfo(hook, filepath.Join(data.Config.ServicePath, actualFP))
-	case service.MiddlewaresPath:
-		m := service.NewMiddlewares(prevFile)
-		// m.Load(prevFile)
-		if genCode, err = m.Render(templFP, data); err != nil {
+	case service.ServiceWrapperPath:
+		w := service.NewServiceWrapper(prevFile)
+		if genCode, err = w.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render middleware template: %s", templFP)
 		}
-		responseInfo(m, filepath.Join(data.Config.ServicePath, actualFP))
+		responseInfo(w, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.CmdServerPath:
 		r := service.NewCmdServer(prevFile)
 		if genCode, err = r.Render(templFP, data); err != nil {
@@ -136,7 +128,20 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 			return nil, ErrGenIgnored
 		}
 	case service.ServerPath:
-		r := service.NewServer(prevFile)
+		r := service.NewServer(nil) // override server.go
+		if genCode, err = r.Render(templFP, data); err != nil {
+			return nil, errors.Wrapf(err, "cannot render server template: %s", templFP)
+		}
+		responseInfo(nil, filepath.Join(data.Config.ServicePath, actualFP))
+	case service.ServerInterruptPath:
+		intrpt := service.NewServerInterrupt(prevFile)
+		if genCode, err = intrpt.Render(templFP, data); err != nil {
+			return nil, errors.Wrapf(err, "cannot render hook template: %s", templFP)
+		}
+		log.Tracef("ServicePath=%v", data.Config.ServicePath)
+		responseInfo(intrpt, filepath.Join(data.Config.ServicePath, actualFP))
+	case service.ServerWrapperPath:
+		r := service.NewServerWrapper(prevFile)
 		if genCode, err = r.Render(templFP, data); err != nil {
 			return nil, errors.Wrapf(err, "cannot render server template: %s", templFP)
 		}
