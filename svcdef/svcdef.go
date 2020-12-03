@@ -259,11 +259,11 @@ func New(goFiles map[string]io.Reader, protoFiles map[string]io.Reader) (*Svcdef
 				if err != nil {
 					return nil, errors.Wrapf(err, "error parsing service %q", t.Name.Name)
 				}
-				log.Debugf("found service %v.Methods(%v)\n", nsvc.Name, len(nsvc.Methods))
+				log.Tracef("found service %v.Methods(%v)\n", nsvc.Name, len(nsvc.Methods))
 				for _, m := range nsvc.Methods {
-					log.Debugf("\t%v.Method = %v\n", nsvc.Name, m.Name)
+					log.Tracef("\t%v.Method = %v\n", nsvc.Name, m.Name)
 					for i, b := range m.Bindings {
-						log.Debugf("\t\t%v.%v.Bindings[%v] = %v\n", nsvc.Name, m.Name, i, b.Verb+"."+b.Path)
+						log.Tracef("\t\t%v.%v.Bindings[%v] = %v\n", nsvc.Name, m.Name, i, b.Verb+"."+b.Path)
 					}
 				}
 				rv.Service = nsvc
@@ -425,9 +425,9 @@ func NewService(s *ast.TypeSpec, info *DebugInfo) (*Service, error) {
 	}
 	asvc := s.Type.(*ast.InterfaceType)
 	for _, m := range asvc.Methods.List {
-		log.Debugf("[svcdef/svcdef.go].NewService Method = %v.%v\n", s.Name.Name, m.Names[0].Name)
+		log.Tracef("[svcdef/svcdef.go].NewService Method = %v.%v\n", s.Name.Name, m.Names[0].Name)
 		if !ast.IsExported(m.Names[0].Name) {
-			log.Debugf("Not Exported %v.%v", s.Name.Name, m.Names[0].Name)
+			log.Tracef("Not Exported %v.%v", s.Name.Name, m.Names[0].Name)
 			continue
 		}
 		nmeth, err := NewServiceMethod(m, info)
@@ -468,13 +468,13 @@ func NewServiceMethod(m *ast.Field, info *DebugInfo) (*ServiceMethod, error) {
 	//            └──────────────────────────────┘   └─────────────────────┘
 	//                         input                         output
 
-	log.Debugf("\tinput:\n")
+	log.Tracef("\tinput:\n")
 	for i, f := range input {
-		log.Debugf("\t\tinput[%v] = %# v\n", i, pretty.Formatter(f))
+		log.Tracef("\t\tinput[%v] = %# v\n", i, pretty.Formatter(f))
 	}
-	log.Debugf("\toutput:\n")
+	log.Tracef("\toutput:\n")
 	for i, f := range output {
-		log.Debugf("\t\toutput[%v] = %# v\n", i, pretty.Formatter(f))
+		log.Tracef("\t\toutput[%v] = %# v\n", i, pretty.Formatter(f))
 	}
 
 	// 检查入参数量, grpc.CallOption 没在参数列表中, stream 目前不支持
@@ -595,17 +595,15 @@ func NewField(f *ast.Field) (*Field, error) {
 		}
 		return nil
 	}
-	// log.Debugf("[svcdef/svcdef.go][NewField] origin field[%v].type=%+v\n", f.Names[0].Name, f.Type)
-	// fmt.Printf("[typeFollower] %# v", pretty.Formatter(f.Type))
 	err := typeFollower(f.Type)
 	if err != nil {
 		return nil, err
 	}
 	// isBaseType grpc 标量类型, 此处不能严格判断是否为基础类型, Type.Message还没有赋值
 	// isBaseType := rv.Type.Message == nil && rv.Type.Enum == nil && rv.Type.Map == nil
-	// log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Type=%+v,IsBaseType=%v,StarExpr=%v,Repeated=%v\n",
+	// log.Tracef("[svcdef/svcdef.go][NewField] new field[%v].Type=%+v,IsBaseType=%v,StarExpr=%v,Repeated=%v\n",
 	// rv.Name, rv.Type.Name, isBaseType, rv.Type.StarExpr, rv.Type.ArrayType)
-	// log.Debugf("[svcdef/svcdef.go][NewField] new field[%v].Message=%v,Enum=%v,Map=%v,Repeated=%v\n",
+	// log.Tracef("[svcdef/svcdef.go][NewField] new field[%v].Message=%v,Enum=%v,Map=%v,Repeated=%v\n",
 	// rv.Name, rv.Type.Message, rv.Type.Enum, rv.Type.Map, rv.Type.ArrayType)
 	return rv, nil
 }

@@ -35,5 +35,5 @@ func (r *ServerRender) IsFirst() bool {
 
 // IsModified 代码是否更改
 func (r *ServerRender) IsModified() bool {
-	return false
+	return true
 }

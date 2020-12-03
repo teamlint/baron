@@ -18,7 +18,7 @@ service Echo {
   rpc Echo (EchoRequest) returns (EchoResponse) {
     option (google.api.http) = {
       // All fields (In) are query parameters of the http request unless otherwise specified
-      post: "/echo"
+      get: "/echo"
 
       /* additional_bindings { */
       /*   // Trailing slashes are different routes */
@@ -51,12 +51,12 @@ service Echo {
     };
   }
 
-  rpc EchoStream (stream EchoRequest) returns (stream EchoResponse) {
-    option (google.api.http) = {
-      // gRPC stream test
-      get: "/echo/stream"
-    };
-  }
+  /* rpc EchoStream (stream EchoRequest) returns (stream EchoResponse) { */
+  /*   option (google.api.http) = { */
+  /*     // gRPC stream test */
+  /*     get: "/echo/stream" */
+  /*   }; */
+  /* } */
 }
 
 message Msg {

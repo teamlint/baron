@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	// This Service Server
 	"github.com/teamlint/baron/_example/start-service/server"
 )
 

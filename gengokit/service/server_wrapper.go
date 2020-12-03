@@ -7,21 +7,21 @@ import (
 	"github.com/teamlint/baron/gengokit"
 )
 
-// NewHook returns a new HookRender
-func NewHook(prev io.Reader) gengokit.Renderable {
-	return &HookRender{
+// NewServerWrapper returns a new server wrapper
+func NewServerWrapper(prev io.Reader) gengokit.Renderable {
+	return &ServerWrapperRender{
 		prev: prev,
 	}
 }
 
-type HookRender struct {
+type ServerWrapperRender struct {
 	prev io.Reader
 }
 
 // Render will return the existing file if it exists, otherwise it will return
 // a brand new copy from the template.
-func (r *HookRender) Render(path string, data *gengokit.Data) (io.Reader, error) {
-	if path != HookPath {
+func (r *ServerWrapperRender) Render(path string, data *gengokit.Data) (io.Reader, error) {
+	if path != ServerWrapperPath {
 		return nil, errors.Errorf("cannot render unknown file: %q", path)
 	}
 	if r.prev != nil {
@@ -31,11 +31,11 @@ func (r *HookRender) Render(path string, data *gengokit.Data) (io.Reader, error)
 }
 
 // IsFirst 首次生成
-func (r *HookRender) IsFirst() bool {
+func (r *ServerWrapperRender) IsFirst() bool {
 	return r.prev == nil
 }
 
 // IsModified 代码是否更改
-func (r *HookRender) IsModified() bool {
+func (r *ServerWrapperRender) IsModified() bool {
 	return false
 }

@@ -133,7 +133,7 @@ func protoc(protoPaths, gopath []string, plugin []string) error {
 	)
 
 	outBytes, err := protocExec.CombinedOutput()
-	log.Debugf("protoc cmd: %v\n", protocExec.Args)
+	log.Tracef("protoc cmd: %v\n", protocExec.Args)
 	if err != nil {
 		return errors.Wrapf(err,
 			"protoc exec failed.\nprotoc output:\n\n%v\nprotoc arguments:\n\n%v\n\n",
