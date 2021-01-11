@@ -13,9 +13,9 @@ var config server.Config
 
 func init() {
 	flag.StringVar(&config.DebugAddr, "debug.addr", ":5060", "Debug and metrics listen address")
-	flag.StringVar(&config.HTTPAddr, "http.addr", ":5050", "HTTP listen address")
-	flag.StringVar(&config.GRPCAddr, "grpc.addr", ":5040", "gRPC (HTTP) listen address")
-	flag.StringVar(&config.NATSAddr, "nats.addr", ":4222", "NATS listen address")
+	flag.StringVar(&config.HTTPAddr, "http.addr", "", "HTTP listen address")
+	flag.StringVar(&config.GRPCAddr, "grpc.addr", "", "gRPC (HTTP) listen address")
+	flag.StringVar(&config.NATSAddr, "nats.addr", "", "NATS listen address")
 	flag.BoolVar(&config.Debug, "debug", false, "Debug mode")
 
 	// Use environment variables, if set. Flags have priority over Env vars.
@@ -43,5 +43,8 @@ func main() {
 	// Update addresses if they have been overwritten by flags
 	flag.Parse()
 
+	if config.HTTPAddr == "" && config.GRPCAddr == "" && config.NATSAddr == "" {
+		fmt.Println("no server to run, serve addr must be set one of [http.addr|grpc.addr|nats.addr]")		
+	}
 	server.Run(config)
 }

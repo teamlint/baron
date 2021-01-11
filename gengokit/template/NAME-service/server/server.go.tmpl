@@ -90,50 +90,56 @@ func Run(cfg Config) {
 	}
 	{{if .HTTPHelper.Methods}}
 	// HTTP transport.
-	go func() {
-		log.Println("transport", "HTTP", "addr", cfg.HTTPAddr)
-		h := pb.MakeHTTPHandler(endpoints, HTTPServerOptions()...)
-		errc <- http.ListenAndServe(cfg.HTTPAddr, h)
-	}()
+	if cfg.HTTPAddr != "" {
+		go func() {
+			log.Println("transport", "HTTP", "addr", cfg.HTTPAddr)
+			h := pb.MakeHTTPHandler(endpoints, HTTPServerOptions()...)
+			errc <- http.ListenAndServe(cfg.HTTPAddr, h)
+		}()
+	}
 	{{end}}
 	{{if eq .Config.Transport "all" "grpc" }}
 	// gRPC transport.
-	go func() {
-		log.Println("transport", "gRPC","addr", cfg.GRPCAddr)
-		ln, err := net.Listen("tcp", cfg.GRPCAddr)
-		if err != nil {
-			errc <- err
-			return
-		}
+	if cfg.GRPCAddr != "" {
+		go func() {
+			log.Println("transport", "gRPC","addr", cfg.GRPCAddr)
+			ln, err := net.Listen("tcp", cfg.GRPCAddr)
+			if err != nil {
+				errc <- err
+				return
+			}
 
-		srv := pb.MakeGRPCServer(endpoints, GRPCServerOptions()...)
-		s := grpc.NewServer()
-		pb.Register{{.Service.Name}}Server(s, srv)
+			srv := pb.MakeGRPCServer(endpoints, GRPCServerOptions()...)
+			s := grpc.NewServer()
+			pb.Register{{.Service.Name}}Server(s, srv)
 
-		errc <- s.Serve(ln)
-	}()
+			errc <- s.Serve(ln)
+		}()
+	}
 	{{end}}
 	{{if eq .Config.Transport "all" "nats" }}
 	// NATS transport.
-	go func() {
-		log.Println("transport", "NATS","addr", cfg.NATSAddr)
-		conn, err := nats.Connect(cfg.NATSAddr)
-		if err != nil {
-			errc <- err
-			return
-		}
-		closeConn := func(c *nats.Conn) {
-			c.Close()
-		}
-		runtime.SetFinalizer(conn, closeConn)
+	if cfg.NATSAddr != "" {
+		go func() {
+			log.Println("transport", "NATS","addr", cfg.NATSAddr)
+			conn, err := nats.Connect(cfg.NATSAddr)
+			if err != nil {
+				errc <- err
+				return
+			}
+			closeConn := func(c *nats.Conn) {
+				c.Close()
+			}
+			runtime.SetFinalizer(conn, closeConn)
 
-		srv := pb.MakeNATSServer(endpoints, NATSSubscriberOptions()...)
-		err = pb.ServeNATS(conn, srv)
-		if err != nil {
-			errc <- err
-			return
-		}
-	}()
+			srv := pb.MakeNATSServer(endpoints, NATSSubscriberOptions()...)
+			err = pb.ServeNATS(conn, srv)
+			if err != nil {
+				errc <- err
+				return
+			}
+		}()
+	}
 	{{end}}
 
 	// Run!

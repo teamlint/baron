@@ -15,7 +15,7 @@ type DB struct {
 
 func init() {
 	global.Container.Provide(func() *DB {
-		return &DB{Conn: "db 连接字符串"}
+		return &DB{Conn: "v1.0.4"}
 	})
 }
 
