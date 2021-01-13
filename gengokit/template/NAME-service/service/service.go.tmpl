@@ -6,7 +6,7 @@ import (
 	pb "{{.PBImportPath -}}"
 )
 
-func NewService() pb.{{GoName .Service.Name}}Server {
+func NewService() *{{ToLower .Service.Name}}Service {
 	return &{{ToLower .Service.Name}}Service{}
 }
 

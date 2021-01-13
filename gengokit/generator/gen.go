@@ -133,12 +133,17 @@ func generateResponseFile(templFP string, data *gengokit.Data, prevFile io.Reade
 			return nil, errors.Wrapf(err, "cannot render server template: %s", templFP)
 		}
 		responseInfo(nil, filepath.Join(data.Config.ServicePath, actualFP))
+	case service.ServerEndpointsPath:
+		edp := service.NewServerEndpoints(prevFile)
+		if genCode, err = edp.Render(templFP, data); err != nil {
+			return nil, errors.Wrapf(err, "cannot render endpoints template: %s", templFP)
+		}
+		responseInfo(edp, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.ServerInterruptPath:
 		intrpt := service.NewServerInterrupt(prevFile)
 		if genCode, err = intrpt.Render(templFP, data); err != nil {
-			return nil, errors.Wrapf(err, "cannot render hook template: %s", templFP)
+			return nil, errors.Wrapf(err, "cannot render interrupt template: %s", templFP)
 		}
-		log.Tracef("ServicePath=%v", data.Config.ServicePath)
 		responseInfo(intrpt, filepath.Join(data.Config.ServicePath, actualFP))
 	case service.ServerWrapperPath:
 		r := service.NewServerWrapper(prevFile)

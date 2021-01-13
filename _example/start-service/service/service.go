@@ -6,7 +6,7 @@ import (
 	pb "github.com/teamlint/baron/_example/api/start"
 )
 
-func NewService() pb.StartServer {
+func NewService() *startService {
 	return &startService{}
 }
 

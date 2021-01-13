@@ -2,6 +2,7 @@ package service
 
 import (
 	pb "github.com/teamlint/baron/_example/api/echo"
+	"github.com/teamlint/baron/_example/echo-service/middleware"
 )
 
 // WrapEndpoints accepts the service's entire collection of endpoints, so that a
@@ -27,7 +28,10 @@ func WrapEndpoints(in pb.Endpoints) pb.Endpoints {
 	// How to apply a middleware to a single endpoint.
 	// in.ExampleEndpoint = authMiddleware(in.ExampleEndpoint)
 
-	return in
+	// return in
+
+	out := middleware.Logging(in)
+	return out
 }
 
 func WrapService(in pb.EchoServer) pb.EchoServer {

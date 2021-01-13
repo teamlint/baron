@@ -5,35 +5,25 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/goava/di"
 	pb "github.com/teamlint/baron/_example/api/echo"
-	"github.com/teamlint/baron/_example/echo-service/global"
+	"github.com/teamlint/baron/_example/echo-service/domain"
 )
 
-type DB struct {
-	Conn string
-}
-
-func init() {
-	global.Container.Provide(func() *DB {
-		return &DB{Conn: "v1.0.4"}
-	})
-}
-
-// NewService returns a naïve, stateless implementation of Service.
-func NewService() pb.EchoServer {
-	var db *DB
-	global.Container.Resolve(&db)
-	return &echoService{DB: db}
+func NewService() *echoService {
+	return &echoService{}
 }
 
 type echoService struct {
-	*DB
+	di.Inject
 	pb.UnimplementedEchoServer
+	EchoService *domain.EchoService
 }
 
 func (s *echoService) Echo(ctx context.Context, in *pb.EchoRequest) (*pb.EchoResponse, error) {
 	var resp pb.EchoResponse
-	result := s.DB.Conn + " " + in.In
+	model, _ := s.EchoService.Get(in.In)
+	result := model.Msg
 	log.Printf("[Echo] EchoRequest=%+v\n", *in)
 	if in.At != nil {
 		result += "|" + fmt.Sprint(*in.At)

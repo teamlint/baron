@@ -12,9 +12,9 @@ const (
 	ServiceWrapperPath = "service/wrapper.go.tmpl"         // 服务包装器模板路径
 	// server
 	ServerPath          = "server/server.go.tmpl"    // 服务器模板路径
-	ServerInterruptPath = "server/interrupt.go.tmpl" // 服务中断模板路径
+	ServerEndpointsPath = "server/endpoints.go.tmpl" // 服务器节点模板路径
+	ServerInterruptPath = "server/interrupt.go.tmpl" // 服务器中断模板路径
 	ServerWrapperPath   = "server/wrapper.go.tmpl"   // 服务器包装器模板路径
-
 )
 
 var (

@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/go-kit/kit v0.10.0
-	github.com/goava/di v1.2.1
+	github.com/goava/di v1.6.3
 	github.com/golang/protobuf v1.4.3
 	github.com/google/go-cmp v0.5.2 // indirect
 	github.com/gorilla/mux v1.8.0
