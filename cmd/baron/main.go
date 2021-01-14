@@ -20,6 +20,7 @@ import (
 	"github.com/teamlint/baron/internal/execprotoc"
 	"github.com/teamlint/baron/internal/parsesvcname"
 	"github.com/teamlint/baron/internal/start"
+	"github.com/teamlint/baron/pkg"
 
 	ggkconf "github.com/teamlint/baron/gengokit"
 	gengokit "github.com/teamlint/baron/gengokit/generator"
@@ -297,8 +298,14 @@ func parseServiceDefinition(cfg *config.Config) (*svcdef.Svcdef, error) {
 	// Get path names of .pb.go|grpc.pb.go files
 	pbgoPaths := []string{}
 	for _, p := range protoDefPaths {
-		pbgoPaths = append(pbgoPaths, parsesvcname.GetPBFileName(p, cfg.PBPath))     // pb.go
-		pbgoPaths = append(pbgoPaths, parsesvcname.GetGRPCPBFileName(p, cfg.PBPath)) // grpc.pb.go
+		pbgoPaths = append(pbgoPaths, parsesvcname.GetPBFileName(p, cfg.PBPath)) // pb.go
+		// 如果是多个proto文件,有些可能没有定义service,没有生成 {NAME}_grpc.pb.go, 跳过
+		grpcGoFileName := parsesvcname.GetGRPCPBFileName(p, cfg.PBPath)
+		if !pkg.FileExists(grpcGoFileName) {
+			log.Warnf("!! %s is not generated", grpcGoFileName)
+			continue
+		}
+		pbgoPaths = append(pbgoPaths, grpcGoFileName) // grpc.pb.go
 	}
 	pbgoFiles, err := openFiles(pbgoPaths)
 	if err != nil {
@@ -364,18 +371,20 @@ func generateBaronCode(cfg *config.Config, sd *svcdef.Svcdef) error {
 	protoDefPaths := cfg.DefPaths
 
 	// Get path names of .pb.baron.go files
-	for _, p := range protoDefPaths {
-		base := filepath.Base(p)
-		barename := strings.TrimSuffix(base, filepath.Ext(p))
-		baronPath := filepath.Join(cfg.PBPath, barename+".pb.baron.go")
+	// .pb.baron.go 仅支持生成一个服务
+	// for _, p := range protoDefPaths {
+	p := protoDefPaths[0]
+	base := filepath.Base(p)
+	barename := strings.TrimSuffix(base, filepath.Ext(p))
+	baronPath := filepath.Join(cfg.PBPath, barename+".pb.baron.go")
 
-		// generate go-kit service
-		err := gengokit.GenerateBaronFile(sd, conf, baronPath)
-		if err != nil {
-			return errors.Wrap(err, "cannot generate baron service")
-		}
-		// log.Infof("*> %s", baronPath)
+	// generate go-kit service
+	err := gengokit.GenerateBaronFile(sd, conf, baronPath)
+	if err != nil {
+		return errors.Wrap(err, "cannot generate baron service")
 	}
+	// log.Infof("*> %s", baronPath)
+	// }
 
 	return nil
 }

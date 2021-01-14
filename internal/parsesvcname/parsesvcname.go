@@ -9,6 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/teamlint/baron/internal/execprotoc"
+	"github.com/teamlint/baron/pkg"
 	"github.com/teamlint/baron/svcdef"
 )
 
@@ -28,8 +29,15 @@ func FromPaths(gopath []string, protoDefPaths []string) (string, error) {
 	// Get path names of .pb.go files
 	pbgoPaths := []string{}
 	for _, p := range protoDefPaths {
-		pbgoPaths = append(pbgoPaths, GetPBFileName(p, td))     // pb.go
-		pbgoPaths = append(pbgoPaths, GetGRPCPBFileName(p, td)) // grpc.pb.go
+		pbgoPaths = append(pbgoPaths, GetPBFileName(p, td)) // pb.go
+		// 如果是多个proto文件,有些可能没有定义service,没有生成 {NAME}_grpc.pb.go, 跳过
+		grpcGoFileName := GetGRPCPBFileName(p, td)
+		if !pkg.FileExists(grpcGoFileName) {
+			// 临时目录的不输出信息
+			// log.Warnf("!! %s is not generated", grpcGoFileName)
+			continue
+		}
+		pbgoPaths = append(pbgoPaths, grpcGoFileName) // grpc.pb.go
 	}
 
 	// Open all .pb.go files and store in map to be passed to svcdef.New()
