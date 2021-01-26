@@ -24,6 +24,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var ErrSvcDefEnd = errors.New("service definition end")
+
 type optionParseErr struct {
 	err error
 }
@@ -198,15 +200,16 @@ func ParseService(lex *SvcLexer) (*Service, error) {
 	// Recursively parse the methods of this service
 	for {
 		rpc, err := ParseMethod(lex)
-
 		if err != nil {
+			// 根据读取进度判断是否结束,不以获取rpc是否为空判断结束
+			if errors.Is(err, ErrSvcDefEnd) {
+				break
+			}
 			return nil, err
 		}
 
 		if rpc != nil {
 			toret.Methods = append(toret.Methods, rpc)
-		} else {
-			break
 		}
 	}
 
@@ -229,7 +232,7 @@ func ParseMethod(lex *SvcLexer) (*Method, error) {
 	switch {
 	// Hit the end of the service definition, so return a nil method
 	case tk == CLOSE_BRACE:
-		return nil, nil
+		return nil, ErrSvcDefEnd
 	case tk != IDENT || val != "rpc":
 		return nil, parserErr{
 			expected: "identifier 'rpc'",
